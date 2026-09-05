@@ -1,0 +1,26 @@
+# Environment files
+.env
+*/.env
+
+# Node
+node_modules/
+*/node_modules/
+npm-debug.log*
+dist/
+build/
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+*.egg-info/
+
+# Uploaded images (local dev storage)
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# OS/editor junk
+.DS_Store
+.vscode/
+.idea/
