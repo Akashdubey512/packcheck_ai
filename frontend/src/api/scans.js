@@ -29,3 +29,11 @@ export async function getDashboardStats() {
   const { data } = await api.get("/dashboard/stats");
   return data;
 }
+
+// Matches GET /api/scans/:id/report in docs/api-contract.md
+export async function downloadScanReport(id) {
+  const { data } = await api.get(`/scans/${id}/report`, {
+    responseType: "blob",
+  });
+  return data;
+}
