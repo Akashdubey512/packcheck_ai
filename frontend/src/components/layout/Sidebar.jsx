@@ -130,7 +130,7 @@ export default function Sidebar({ onNavClick, className = "" }) {
             <span className="tracking-wide uppercase">Statutory Scope</span>
           </div>
           <p className="text-[10px] text-slate-400 leading-relaxed font-sans">
-            Legal Metrology (Packaged Commodities) Rules, 2011 — Mandatory Rule 6 Declarations
+            Legal Metrology (Packaged Commodities) Rules, 2011 — Declaration verification and compliance assessment
           </p>
         </div>
       </div>
