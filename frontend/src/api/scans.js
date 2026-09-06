@@ -1,6 +1,4 @@
-import axios from "axios";
-
-const api = axios.create({ baseURL: import.meta.env.VITE_API_BASE_URL });
+import api from "./client.js";
 
 // Matches POST /api/scans in docs/api-contract.md
 export async function uploadScan(file, panelWidthCm, panelHeightCm) {
