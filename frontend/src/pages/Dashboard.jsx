@@ -357,7 +357,8 @@ function HistoryView() {
 
   // Derive controlled state from URL query params
   const statusParam = searchParams.get("status") || "";
-  const pageParam = parseInt(searchParams.get("page") || "1", 10);
+  const rawPage = parseInt(searchParams.get("page"), 10);
+  const pageParam = Number.isInteger(rawPage) && rawPage >= 1 ? rawPage : 1;
 
   const [data, setData] = useState(null); // { total, page, limit, scans }
   const [loading, setLoading] = useState(true);

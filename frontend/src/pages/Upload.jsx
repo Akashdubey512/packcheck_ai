@@ -148,12 +148,31 @@ export default function Upload() {
     e.preventDefault();
     if (!file || loading) return;
 
-    setLoading(true);
     setError(null);
 
-    // Optional numeric dimension parsing
-    const parsedWidth = panelWidthCm.trim() !== "" ? parseFloat(panelWidthCm) : undefined;
-    const parsedHeight = panelHeightCm.trim() !== "" ? parseFloat(panelHeightCm) : undefined;
+    // Optional numeric dimension parsing & validation
+    let parsedWidth;
+    let parsedHeight;
+
+    if (panelWidthCm.trim() !== "") {
+      const w = parseFloat(panelWidthCm);
+      if (!Number.isFinite(w) || w <= 0) {
+        setError("Panel width must be a valid number greater than 0 cm.");
+        return;
+      }
+      parsedWidth = w;
+    }
+
+    if (panelHeightCm.trim() !== "") {
+      const h = parseFloat(panelHeightCm);
+      if (!Number.isFinite(h) || h <= 0) {
+        setError("Panel height must be a valid number greater than 0 cm.");
+        return;
+      }
+      parsedHeight = h;
+    }
+
+    setLoading(true);
 
     try {
       const result = await uploadScan(file, parsedWidth, parsedHeight);

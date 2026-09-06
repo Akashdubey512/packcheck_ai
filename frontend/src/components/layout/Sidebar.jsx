@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   ShieldCheck,
   ScanLine,
@@ -7,7 +7,9 @@ import {
   LayoutDashboard,
   User,
   Scale,
+  LogOut,
 } from "lucide-react";
+import { useAuth } from "../../context/AuthContext.jsx";
 
 /**
  * NIRIKSHAN Left Sidebar Navigation
@@ -16,6 +18,13 @@ import {
  */
 export default function Sidebar({ onNavClick, className = "" }) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   // Navigation route matching
   const isNewScanActive = location.pathname === "/" || location.pathname === "";
@@ -135,16 +144,28 @@ export default function Sidebar({ onNavClick, className = "" }) {
         </div>
       </div>
 
-      {/* Bottom Sidebar Area (Neutral Account Placeholder — No fake names or roles) */}
+      {/* Bottom Sidebar Area — Authenticated Officer Account & Logout */}
       <div className="p-3 border-t border-slate-800/80 mt-auto bg-slate-950">
-        <div className="flex items-center justify-between px-3 py-2 rounded text-xs font-medium text-slate-400 bg-slate-900/60 border border-slate-800">
+        <div className="flex items-center justify-between px-3 py-2 rounded text-xs font-medium bg-slate-900/60 border border-slate-800 gap-2">
           <div className="flex items-center gap-2.5 min-w-0">
-            <User className="w-4 h-4 text-slate-500 shrink-0" />
-            <span className="truncate text-slate-300">Account</span>
+            <User className="w-4 h-4 text-slate-400 shrink-0" />
+            <span
+              className="truncate text-slate-200 font-medium"
+              title={user?.name || user?.email || "Officer Account"}
+            >
+              {user?.name || "Officer"}
+            </span>
           </div>
-          <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500 bg-slate-800/80 px-1.5 py-0.5 rounded border border-slate-700/60">
-            Standby
-          </span>
+          <button
+            type="button"
+            onClick={handleLogout}
+            title="Log out of session"
+            aria-label="Log out of session"
+            className="inline-flex items-center gap-1 text-[11px] font-mono text-slate-400 hover:text-rose-400 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-rose-400 rounded px-1.5 py-0.5 shrink-0 select-none"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Logout</span>
+          </button>
         </div>
       </div>
     </div>
