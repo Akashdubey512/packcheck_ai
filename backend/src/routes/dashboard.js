@@ -1,9 +1,9 @@
 import express from "express";
+import { requireAuth } from "../middleware/auth.js";
+import { getStats } from "../controllers/dashboardController.js";
+
 const router = express.Router();
 
-// GET /api/dashboard/stats
-router.get("/stats", async (req, res) => {
-  res.status(501).json({ error: "Not implemented" });
-});
+router.get("/stats", requireAuth, getStats);
 
 export default router;
