@@ -1,0 +1,117 @@
+/**
+ * DESIGN TOKENS - REGULATORY COMPLIANCE PLATFORM
+ * Tone: Institutional, Authoritative, Precise, Calm, Data-rich
+ * Strict 8px rhythmic spacing and accessible semantic contrast
+ */
+
+:root {
+  color-scheme: light dark;
+
+  /* Neutrals & Surfaces - Light Mode */
+  --color-bg: #f8fafc; /* Slate 50 */
+  --color-fg: #0f172a; /* Slate 900 */
+  --color-surface: #ffffff; /* Pure white card surface */
+  --color-surface-elevated: #ffffff;
+  --color-surface-muted: #f1f5f9; /* Slate 100 */
+  --color-surface-subtle: #f8fafc; /* Slate 50 */
+
+  /* Borders - Subtle, 1px institutional boundaries */
+  --color-border: #e2e8f0; /* Slate 200 */
+  --color-border-muted: #edf2f7;
+  --color-border-strong: #cbd5e1; /* Slate 300 */
+
+  /* Primary Brand - Institutional Deep Navy / Blue */
+  --color-primary: #0f2744; /* Deep Navy */
+  --color-primary-hover: #163a63;
+  --color-primary-active: #09192c;
+  --color-primary-foreground: #ffffff;
+
+  /* Semantic Status Tokens (Must ALWAYS be accompanied by Icon + Text + Label) */
+  /* Compliant (Emerald / Green) */
+  --color-compliant: #059669; /* Emerald 600 */
+  --color-compliant-surface: #ecfdf5; /* Emerald 50 */
+  --color-compliant-border: #a7f3d0; /* Emerald 200 */
+  --color-compliant-fg: #065f46; /* Emerald 800 */
+
+  /* Violation (Rose / Red) */
+  --color-violation: #dc2626; /* Red 600 */
+  --color-violation-surface: #fef2f2; /* Red 50 */
+  --color-violation-border: #fecaca; /* Red 200 */
+  --color-violation-fg: #991b1b; /* Red 800 */
+
+  /* Review / Warning (Amber) */
+  --color-review: #d97706; /* Amber 600 */
+  --color-review-surface: #fffbeb; /* Amber 50 */
+  --color-review-border: #fde68a; /* Amber 200 */
+  --color-review-fg: #92400e; /* Amber 800 */
+
+  /* Information (Sky / Blue) */
+  --color-info: #0284c7; /* Sky 600 */
+  --color-info-surface: #f0f9ff; /* Sky 50 */
+  --color-info-border: #bae6fd; /* Sky 200 */
+  --color-info-fg: #075985; /* Sky 800 */
+
+  /* Spacing Scale (8px rhythm) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Radii - Moderate, restrained */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+}
+
+/* Dark Mode Tokens - Deep Slate & Navy, Layered Surfaces, No Neon */
+.dark {
+  --color-bg: #0b1120; /* Deep Slate 950 */
+  --color-fg: #f1f5f9; /* Slate 100 */
+  --color-surface: #0f172a; /* Slate 900 */
+  --color-surface-elevated: #1e293b; /* Slate 800 */
+  --color-surface-muted: #162032; /* Slightly darker than 800 */
+  --color-surface-subtle: #0d1527;
+
+  /* Borders in dark mode - Clean, low contrast, restrained */
+  --color-border: #1e293b; /* Slate 800 */
+  --color-border-muted: #172338;
+  --color-border-strong: #334155; /* Slate 700 */
+
+  /* Primary Brand - High contrast navy tint */
+  --color-primary: #38bdf8; /* Sky 400 accent in dark mode */
+  --color-primary-hover: #7dd3fc;
+  --color-primary-active: #0284c7;
+  --color-primary-foreground: #082f49;
+
+  /* Semantic Status Tokens - Dark Mode accessible tints */
+  /* Compliant */
+  --color-compliant: #34d399; /* Emerald 400 */
+  --color-compliant-surface: #064e3b33; /* 20% opacity */
+  --color-compliant-border: #065f46;
+  --color-compliant-fg: #a7f3d0;
+
+  /* Violation */
+  --color-violation: #f87171; /* Red 400 */
+  --color-violation-surface: #7f1d1d33;
+  --color-violation-border: #991b1b;
+  --color-violation-fg: #fecaca;
+
+  /* Review */
+  --color-review: #fbbf24; /* Amber 400 */
+  --color-review-surface: #78350f33;
+  --color-review-border: #92400e;
+  --color-review-fg: #fde68a;
+
+  /* Information */
+  --color-info: #38bdf8; /* Sky 400 */
+  --color-info-surface: #0c4a6e33;
+  --color-info-border: #075985;
+  --color-info-fg: #bae6fd;
+}
