@@ -1,24 +1,19 @@
 import express from "express";
+import { upload } from "../middleware/upload.js";
+import { requireAuth } from "../middleware/auth.js";
+import {
+  createScan,
+  listScans,
+  getScanById,
+  getScanReport,
+} from "../controllers/scanController.js";
+
 const router = express.Router();
 
-// POST /api/scans - upload image, call AI service, save result (see api-contract.md)
-router.post("/", async (req, res) => {
-  res.status(501).json({ error: "Not implemented" });
-});
-
-// GET /api/scans - list, paginated
-router.get("/", async (req, res) => {
-  res.status(501).json({ error: "Not implemented" });
-});
-
-// GET /api/scans/:id
-router.get("/:id", async (req, res) => {
-  res.status(501).json({ error: "Not implemented" });
-});
-
-// GET /api/scans/:id/report - PDF download
-router.get("/:id/report", async (req, res) => {
-  res.status(501).json({ error: "Not implemented" });
-});
+// requireAuth first (must be logged in), then upload.single("image") parses the multipart body
+router.post("/", requireAuth, upload.single("image"), createScan);
+router.get("/", requireAuth, listScans);
+router.get("/:id", requireAuth, getScanById);
+router.get("/:id/report", requireAuth, getScanReport);
 
 export default router;

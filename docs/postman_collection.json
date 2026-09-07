@@ -1,0 +1,136 @@
+{
+  "info": {
+    "name": "Legal Metrology Compliance Checker",
+    "description": "Backend API tests. Set baseUrl variable first. Run requests top-to-bottom - Register/Login auto-save the token, Create Scan auto-saves scanId, both used by later requests automatically.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000/api" },
+    { "key": "token", "value": "" },
+    { "key": "scanId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1. Register",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/auth/register",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Test Officer\",\n  \"email\": \"officer1@test.com\",\n  \"password\": \"password123\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "if (pm.response.code === 201) {",
+              "  const data = pm.response.json();",
+              "  pm.collectionVariables.set('token', data.token);",
+              "  console.log('Token saved:', data.token);",
+              "} else if (pm.response.code === 409) {",
+              "  console.log('User already exists - run Login instead');",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Login",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"officer1@test.com\",\n  \"password\": \"password123\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+              "const data = pm.response.json();",
+              "pm.collectionVariables.set('token', data.token);",
+              "console.log('Token saved:', data.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Create Scan (upload image)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/scans",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            { "key": "image", "type": "file", "src": "" },
+            { "key": "panelWidthCm", "value": "8.5", "type": "text", "disabled": true },
+            { "key": "panelHeightCm", "value": "12", "type": "text", "disabled": true }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 201', () => pm.response.to.have.status(201));",
+              "const data = pm.response.json();",
+              "pm.collectionVariables.set('scanId', data.scanId);",
+              "console.log('scanId saved:', data.scanId);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. List Scans",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": {
+          "raw": "{{baseUrl}}/scans?page=1&limit=20",
+          "host": ["{{baseUrl}}"],
+          "path": ["scans"],
+          "query": [
+            { "key": "page", "value": "1" },
+            { "key": "limit", "value": "20" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "5. Get Scan by ID",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/scans/{{scanId}}"
+      }
+    },
+    {
+      "name": "6. Get Scan Report (PDF)",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/scans/{{scanId}}/report"
+      }
+    },
+    {
+      "name": "7. Dashboard Stats",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+        "url": "{{baseUrl}}/dashboard/stats"
+      }
+    }
+  ]
+}
