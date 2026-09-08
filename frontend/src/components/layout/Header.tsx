@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   ShieldCheck,
   Sun,
@@ -18,13 +19,19 @@ import { useAuth } from '@/hooks/useAuth';
 import { env } from '@/app/config/env';
 import { Role, ROLE_DEFINITIONS } from '@/types/user';
 import { ROUTES } from '@/constants/routes';
+import { butterSpring, modalPopoverVariants, gpuAcceleratedStyle } from '@/animations/motion';
 
 interface HeaderProps {
   onToggleMobileMenu?: () => void;
   isMobileMenuOpen?: boolean;
+  isLandingPage?: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu, isMobileMenuOpen = false }) => {
+export const Header: React.FC<HeaderProps> = ({
+  onToggleMobileMenu,
+  isMobileMenuOpen = false,
+  isLandingPage = false,
+}) => {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const { user, role, switchRole, logout, isAuthenticated } = useAuth();
@@ -37,7 +44,8 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu, isMobileMenu
       {/* Left: Mobile Menu Toggle & Brand Identification */}
       <div className="flex items-center gap-2 sm:gap-3">
         {onToggleMobileMenu && (
-          <button
+          <motion.button
+            whileTap={{ scale: 0.92 }}
             type="button"
             onClick={onToggleMobileMenu}
             aria-label={isMobileMenuOpen ? 'Close Navigation Menu' : 'Open Navigation Menu'}
@@ -45,15 +53,17 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu, isMobileMenu
             className="p-1.5 rounded text-slate-500 hover:text-foreground hover:bg-surface-muted transition-colors md:hidden"
           >
             {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
+          </motion.button>
         )}
 
-        <div
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => navigate(ROUTES.HOME)}
-          className="h-8 w-8 rounded bg-institutional-900 dark:bg-sky-500/20 text-white dark:text-sky-400 flex items-center justify-center border border-institutional-800 dark:border-sky-500/30 cursor-pointer shrink-0"
+          className="h-8 w-8 rounded bg-institutional-900 dark:bg-sky-500/20 text-white dark:text-sky-400 flex items-center justify-center border border-institutional-800 dark:border-sky-500/30 cursor-pointer shrink-0 shadow-sm"
         >
           <ShieldCheck size={18} strokeWidth={2.2} />
-        </div>
+        </motion.div>
 
         <div className="flex flex-col cursor-pointer" onClick={() => navigate(ROUTES.HOME)}>
           <div className="flex items-center gap-1.5 sm:gap-2">
@@ -76,11 +86,33 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu, isMobileMenu
         </div>
       </div>
 
+      {/* Center Nav Links on Landing Page */}
+      {isLandingPage && (
+        <nav className="hidden lg:flex items-center gap-6 text-xs font-medium text-slate-400">
+          <button onClick={() => navigate(ROUTES.DASHBOARD)} className="hover:text-foreground transition-colors">
+            Dashboard
+          </button>
+          <button onClick={() => navigate(ROUTES.SCAN)} className="hover:text-foreground transition-colors">
+            Scan &amp; Ingest
+          </button>
+          <button onClick={() => navigate(ROUTES.HISTORY)} className="hover:text-foreground transition-colors">
+            Audit Vault
+          </button>
+          <button onClick={() => navigate(ROUTES.VERIFY)} className="hover:text-foreground transition-colors">
+            Verify Batch
+          </button>
+          <button onClick={() => navigate(ROUTES.REPORTS)} className="hover:text-foreground transition-colors">
+            Reports
+          </button>
+        </nav>
+      )}
+
       {/* Right: Utilities, Theme & Role-Aware Controls */}
       <div className="flex items-center gap-1.5 sm:gap-3">
         {/* Interactive Role Switcher */}
         <div className="relative">
-          <button
+          <motion.button
+            whileTap={{ scale: 0.96 }}
             type="button"
             onClick={() => setShowRoleDropdown(!showRoleDropdown)}
             className={`flex items-center gap-1 px-2 py-1 rounded text-2xs font-mono font-bold uppercase border transition-colors ${roleDef.badgeClass}`}
@@ -92,76 +124,108 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu, isMobileMenu
             <span className="hidden sm:inline">{roleDef.title}</span>
             <span className="sm:hidden">{role.slice(0, 3)}</span>
             <ChevronDown size={11} className="opacity-70" />
-          </button>
+          </motion.button>
 
-          {showRoleDropdown && (
-            <div className="absolute right-0 mt-1 w-64 rounded bg-surface border border-border shadow-modal p-1 z-50 text-xs text-foreground space-y-0.5">
-              <div className="px-2 py-1 text-2xs font-semibold text-slate-400 uppercase tracking-wider">
-                Select Active User Role
-              </div>
-              {(Object.keys(ROLE_DEFINITIONS) as Role[]).map((rKey) => {
-                const rItem = ROLE_DEFINITIONS[rKey];
-                return (
-                  <button
-                    key={rKey}
-                    type="button"
-                    onClick={() => {
-                      switchRole(rKey);
-                      setShowRoleDropdown(false);
-                    }}
-                    className={`w-full text-left px-2.5 py-1.5 rounded text-xs flex flex-col transition-colors ${
-                      role === rKey ? 'bg-surface-muted font-bold text-primary' : 'hover:bg-surface-muted/60'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span>{rItem.title}</span>
-                      {role === rKey && <span className="text-2xs text-primary font-mono font-normal">Active</span>}
-                    </div>
-                    <span className="text-2xs text-slate-500 font-normal line-clamp-1">{rItem.description}</span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
+          <AnimatePresence>
+            {showRoleDropdown && (
+              <motion.div
+                variants={modalPopoverVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                style={gpuAcceleratedStyle}
+                className="absolute right-0 mt-1 w-64 rounded bg-surface border border-border shadow-modal p-1 z-50 text-xs text-foreground space-y-0.5"
+              >
+                <div className="px-2 py-1 text-2xs font-semibold text-slate-400 uppercase tracking-wider">
+                  Select Active User Role
+                </div>
+                {(Object.keys(ROLE_DEFINITIONS) as Role[]).map((rKey) => {
+                  const rItem = ROLE_DEFINITIONS[rKey];
+                  return (
+                    <button
+                      key={rKey}
+                      type="button"
+                      onClick={() => {
+                        switchRole(rKey);
+                        setShowRoleDropdown(false);
+                      }}
+                      className={`w-full text-left px-2.5 py-1.5 rounded text-xs flex flex-col transition-colors ${
+                        role === rKey ? 'bg-surface-muted font-bold text-primary' : 'hover:bg-surface-muted/60'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span>{rItem.title}</span>
+                        {role === rKey && <span className="text-2xs text-primary font-mono font-normal">Active</span>}
+                      </div>
+                      <span className="text-2xs text-slate-500 font-normal line-clamp-1">{rItem.description}</span>
+                    </button>
+                  );
+                })}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* System Notification Bell */}
-        <button
+        <motion.button
+          whileHover={{ rotate: [0, -12, 12, -6, 0], scale: 1.05 }}
+          whileTap={{ scale: 0.92 }}
           type="button"
           aria-label="System Notifications"
           className="p-1.5 rounded text-slate-500 hover:text-foreground hover:bg-surface-muted transition-colors"
         >
           <Bell size={15} />
-        </button>
+        </motion.button>
 
-        {/* Theme Mode Selector */}
-        <div className="flex items-center border border-border rounded bg-surface-muted p-0.5 text-slate-600 dark:text-slate-400">
+        {/* Theme Mode Selector with Liquid Sliding Spring Pill */}
+        <div className="relative flex items-center border border-border rounded bg-surface-muted p-0.5 text-slate-600 dark:text-slate-400">
           <button
             type="button"
             onClick={() => setTheme('light')}
             title="Light theme"
             aria-label="Light theme"
-            className={`p-1 rounded ${theme === 'light' ? 'bg-surface text-foreground shadow-subtle' : 'hover:text-foreground'}`}
+            className="relative p-1 rounded z-10 hover:text-foreground transition-colors"
           >
-            <Sun size={13} />
+            {theme === 'light' && (
+              <motion.span
+                layoutId="activeThemePill"
+                transition={butterSpring}
+                className="absolute inset-0 bg-surface rounded shadow-subtle border border-border/50 -z-10"
+              />
+            )}
+            <Sun size={13} className={theme === 'light' ? 'text-foreground' : ''} />
           </button>
           <button
             type="button"
             onClick={() => setTheme('dark')}
             title="Dark theme"
             aria-label="Dark theme"
-            className={`p-1 rounded ${theme === 'dark' ? 'bg-surface text-foreground shadow-subtle' : 'hover:text-foreground'}`}
+            className="relative p-1 rounded z-10 hover:text-foreground transition-colors"
           >
-            <Moon size={13} />
+            {theme === 'dark' && (
+              <motion.span
+                layoutId="activeThemePill"
+                transition={butterSpring}
+                className="absolute inset-0 bg-surface rounded shadow-subtle border border-border/50 -z-10"
+              />
+            )}
+            <Moon size={13} className={theme === 'dark' ? 'text-foreground' : ''} />
           </button>
           <button
             type="button"
             onClick={() => setTheme('system')}
             title="System theme"
             aria-label="System theme"
-            className={`p-1 rounded ${theme === 'system' ? 'bg-surface text-foreground shadow-subtle' : 'hover:text-foreground'}`}
+            className="relative p-1 rounded z-10 hover:text-foreground transition-colors"
           >
-            <Laptop size={13} />
+            {theme === 'system' && (
+              <motion.span
+                layoutId="activeThemePill"
+                transition={butterSpring}
+                className="absolute inset-0 bg-surface rounded shadow-subtle border border-border/50 -z-10"
+              />
+            )}
+            <Laptop size={13} className={theme === 'system' ? 'text-foreground' : ''} />
           </button>
         </div>
 

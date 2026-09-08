@@ -1,12 +1,15 @@
 import React from 'react';
+import { motion, HTMLMotionProps } from 'framer-motion';
 import { cn } from '@/utils/cn';
 
-interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+interface CardProps extends Omit<HTMLMotionProps<'div'>, 'children'> {
   variant?: 'default' | 'elevated' | 'muted';
+  interactive?: boolean;
+  children?: React.ReactNode;
 }
 
 export const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, variant = 'default', children, ...props }, ref) => {
+  ({ className, variant = 'default', interactive = false, children, ...props }, ref) => {
     const variants = {
       default: 'bg-surface border border-border shadow-card',
       elevated: 'bg-surface-elevated border border-border shadow-elevated',
@@ -14,13 +17,19 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
     };
 
     return (
-      <div
+      <motion.div
         ref={ref}
-        className={cn('rounded border text-foreground transition-colors', variants[variant], className)}
+        whileHover={interactive ? { y: -2, transition: { duration: 0.16, ease: [0.16, 1, 0.3, 1] } } : undefined}
+        className={cn(
+          'rounded border text-foreground transition-colors relative',
+          variants[variant],
+          interactive && 'hover:border-border-strong hover:shadow-elevated cursor-pointer',
+          className
+        )}
         {...props}
       >
         {children}
-      </div>
+      </motion.div>
     );
   }
 );

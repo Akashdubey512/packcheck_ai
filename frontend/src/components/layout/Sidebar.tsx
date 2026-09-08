@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard,
   ScanLine,
@@ -15,6 +16,7 @@ import {
 import { ROUTES } from '@/constants/routes';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/utils/cn';
+import { butterSpring, gpuAcceleratedStyle } from '@/animations/motion';
 
 interface NavItem {
   name: string;
@@ -38,6 +40,7 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onCloseMobile }) => {
   const { canAccess, role } = useAuth();
+  const location = useLocation();
 
   // Close mobile drawer on Escape key press
   useEffect(() => {
@@ -61,9 +64,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onCloseMob
           <span>Authorized Modules</span>
           <span className="font-mono text-primary text-[10px] uppercase">[{role.slice(0, 5)}]</span>
         </div>
-        <nav className="space-y-0.5" aria-label="Main Navigation">
+        <nav className="space-y-1" aria-label="Main Navigation">
           {visibleNavItems.map((item) => {
             const Icon = item.icon;
+            const isActive = location.pathname === item.to || (item.to !== '/' && location.pathname.startsWith(item.to));
             return (
               <NavLink
                 key={item.to}
@@ -71,17 +75,29 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onCloseMob
                 onClick={() => {
                   if (onCloseMobile) onCloseMobile();
                 }}
-                className={({ isActive }) =>
-                  cn(
-                    'flex items-center gap-2.5 px-3 py-2 text-xs font-medium rounded transition-colors',
-                    isActive
-                      ? 'bg-institutional-900 text-white dark:bg-sky-500/20 dark:text-sky-300 font-semibold'
-                      : 'text-slate-600 dark:text-slate-400 hover:bg-surface-muted hover:text-foreground'
-                  )
-                }
+                className="relative block rounded text-xs font-medium outline-none select-none"
               >
-                <Icon size={16} className="shrink-0" aria-hidden="true" />
-                <span>{item.name}</span>
+                <motion.div
+                  whileHover={{ x: 2 }}
+                  whileTap={{ scale: 0.98 }}
+                  className={cn(
+                    'relative z-10 flex items-center gap-2.5 px-3 py-2 rounded transition-colors',
+                    isActive
+                      ? 'text-white dark:text-sky-300 font-semibold'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-foreground hover:bg-surface-muted/40'
+                  )}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="sidebarActivePill"
+                      transition={butterSpring}
+                      style={gpuAcceleratedStyle}
+                      className="absolute inset-0 bg-institutional-900 dark:bg-sky-500/20 rounded border border-transparent dark:border-sky-500/30 shadow-subtle -z-10"
+                    />
+                  )}
+                  <Icon size={16} className="shrink-0" aria-hidden="true" />
+                  <span>{item.name}</span>
+                </motion.div>
               </NavLink>
             );
           })}
@@ -95,7 +111,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onCloseMob
             <Shield size={12} className="text-compliant" aria-hidden="true" />
             ROLE-BASED ACCESS
           </span>
-          <span className="inline-block w-2 h-2 rounded-full bg-emerald-500" aria-hidden="true"></span>
+          <span className="relative flex h-2 w-2">
+            <span className="animate-beacon absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
         </div>
         <p className="leading-tight text-[11px]">
           Session authorized under Legal Metrology &amp; Packaging Compliance Platform.
@@ -121,38 +140,47 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onCloseMob
       </aside>
 
       {/* Mobile Drawer Backdrop & Slide-over Panel */}
-      {mobileOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-sm md:hidden"
-          onClick={onCloseMobile}
-          aria-hidden="true"
-        />
-      )}
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-sm md:hidden"
+              onClick={onCloseMobile}
+              aria-hidden="true"
+            />
 
-      <div
-        className={cn(
-          'fixed inset-y-0 left-0 z-50 w-64 bg-surface border-r border-border flex flex-col justify-between select-none shadow-2xl transition-transform duration-300 ease-in-out md:hidden',
-          mobileOpen ? 'translate-x-0' : '-translate-x-full'
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={butterSpring}
+              style={gpuAcceleratedStyle}
+              className="fixed inset-y-0 left-0 z-50 w-64 bg-surface border-r border-border flex flex-col justify-between select-none shadow-2xl md:hidden"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Mobile Navigation Menu"
+            >
+              <div className="flex items-center justify-between p-3 border-b border-border bg-surface-muted/50">
+                <span className="text-xs font-bold text-foreground uppercase tracking-wider">
+                  Navigation Menu
+                </span>
+                <button
+                  type="button"
+                  onClick={onCloseMobile}
+                  aria-label="Close navigation menu"
+                  className="p-1 rounded text-slate-400 hover:text-foreground hover:bg-surface-muted"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              {navContent}
+            </motion.div>
+          </>
         )}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Mobile Navigation Menu"
-      >
-        <div className="flex items-center justify-between p-3 border-b border-border bg-surface-muted/50">
-          <span className="text-xs font-bold text-foreground uppercase tracking-wider">
-            Navigation Menu
-          </span>
-          <button
-            type="button"
-            onClick={onCloseMobile}
-            aria-label="Close navigation menu"
-            className="p-1 rounded text-slate-400 hover:text-foreground hover:bg-surface-muted"
-          >
-            <X size={18} />
-          </button>
-        </div>
-        {navContent}
-      </div>
+      </AnimatePresence>
     </>
   );
 };

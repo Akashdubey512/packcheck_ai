@@ -70,21 +70,21 @@
   --radius-lg: 8px;
 }
 
-/* Dark Mode Tokens - Deep Slate & Navy, Layered Surfaces, No Neon */
+/* Dark Mode Tokens - Charcoal #282828 Palette, Layered Surfaces */
 .dark {
-  --color-bg: #0b1120; /* Deep Slate 950 */
+  --color-bg: #282828; /* Exact user-specified dark background */
   --color-fg: #f1f5f9; /* Slate 100 */
-  --color-surface: #0f172a; /* Slate 900 */
-  --color-surface-elevated: #1e293b; /* Slate 800 */
-  --color-surface-muted: #162032; /* Slightly darker than 800 */
-  --color-surface-subtle: #0d1527;
+  --color-surface: #303030; /* Elevated surface above #282828 */
+  --color-surface-elevated: #383838; /* Modal and dropdown surface */
+  --color-surface-muted: #222222; /* Recessed/secondary surface */
+  --color-surface-subtle: #1f1f1f; /* Input field background */
 
   /* Borders in dark mode - Clean, low contrast, restrained */
-  --color-border: #1e293b; /* Slate 800 */
-  --color-border-muted: #172338;
-  --color-border-strong: #334155; /* Slate 700 */
+  --color-border: #3d3d3d; /* Clean border for #282828 canvas */
+  --color-border-muted: #333333;
+  --color-border-strong: #525252;
 
-  /* Primary Brand - High contrast navy tint */
+  /* Primary Brand - High contrast accent in dark mode */
   --color-primary: #38bdf8; /* Sky 400 accent in dark mode */
   --color-primary-hover: #7dd3fc;
   --color-primary-active: #0284c7;
@@ -115,3 +115,45 @@
   --color-info-border: #075985;
   --color-info-fg: #bae6fd;
 }
+
+/* System Dark Theme Preference (when not explicitly pinned to .light) */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --color-bg: #282828;
+    --color-fg: #f1f5f9;
+    --color-surface: #303030;
+    --color-surface-elevated: #383838;
+    --color-surface-muted: #222222;
+    --color-surface-subtle: #1f1f1f;
+
+    --color-border: #3d3d3d;
+    --color-border-muted: #333333;
+    --color-border-strong: #525252;
+
+    --color-primary: #38bdf8;
+    --color-primary-hover: #7dd3fc;
+    --color-primary-active: #0284c7;
+    --color-primary-foreground: #082f49;
+
+    --color-compliant: #34d399;
+    --color-compliant-surface: #064e3b33;
+    --color-compliant-border: #065f46;
+    --color-compliant-fg: #a7f3d0;
+
+    --color-violation: #f87171;
+    --color-violation-surface: #7f1d1d33;
+    --color-violation-border: #991b1b;
+    --color-violation-fg: #fecaca;
+
+    --color-review: #fbbf24;
+    --color-review-surface: #78350f33;
+    --color-review-border: #92400e;
+    --color-review-fg: #fde68a;
+
+    --color-info: #38bdf8;
+    --color-info-surface: #0c4a6e33;
+    --color-info-border: #075985;
+    --color-info-fg: #bae6fd;
+  }
+}
+

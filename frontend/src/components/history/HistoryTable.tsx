@@ -47,8 +47,12 @@ export const HistoryTable: React.FC<HistoryTableProps> = ({ items, loading = fal
             </TableRow>
           ) : (
             items.map((item) => (
-              <TableRow key={item.id}>
-                <TableCell className="font-mono text-2xs font-semibold text-foreground">
+              <TableRow
+                key={item.id}
+                className="hover:bg-surface-muted/60 transition-colors cursor-pointer group"
+                onClick={() => navigate(buildRoute.scanDetail(item.scanId))}
+              >
+                <TableCell className="font-mono text-2xs font-semibold text-foreground group-hover:text-primary transition-colors">
                   {item.scanId}
                 </TableCell>
                 <TableCell className="font-medium text-foreground max-w-xs truncate">

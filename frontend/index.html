@@ -14,12 +14,18 @@
       // Prevent theme flash of unstyled content
       (function() {
         try {
-          const storedTheme = localStorage.getItem('app_theme');
-          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          if (storedTheme === 'dark' || (!storedTheme && prefersDark)) {
+          var raw = localStorage.getItem('app_theme');
+          var theme = raw;
+          try {
+            if (raw) theme = JSON.parse(raw);
+          } catch (_) {}
+          var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (theme === 'dark' || ((!theme || theme === 'system') && prefersDark)) {
             document.documentElement.classList.add('dark');
+            document.documentElement.classList.remove('light');
           } else {
             document.documentElement.classList.remove('dark');
+            document.documentElement.classList.add('light');
           }
         } catch (_) {}
       })();

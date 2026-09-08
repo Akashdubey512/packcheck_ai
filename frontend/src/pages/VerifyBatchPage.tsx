@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { PageShell } from '@/components/layout/PageShell';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/Button';
@@ -7,6 +8,7 @@ import { PublicVerificationView, QRVerificationCard } from '@/components/verific
 import { VerificationService, BatchVerificationResponse } from '@/services/verificationService';
 import { ROUTES } from '@/constants/routes';
 import { ArrowLeft, RotateCw, AlertTriangle } from 'lucide-react';
+import { staggerContainer, staggerItem, gpuAcceleratedStyle } from '@/animations/motion';
 
 export const VerifyBatchPage: React.FC = () => {
   const { batch_id = 'LOT-2026-X89' } = useParams<{ batch_id: string }>();
@@ -78,21 +80,27 @@ export const VerifyBatchPage: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <motion.div
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+          style={gpuAcceleratedStyle}
+          className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"
+        >
           {/* Main Column: Public Verification Details */}
-          <div className="lg:col-span-8">
+          <motion.div variants={staggerItem} className="lg:col-span-8">
             <PublicVerificationView data={data} />
-          </div>
+          </motion.div>
 
           {/* Sidebar Column: Visual QR Verification Card */}
-          <div className="lg:col-span-4 space-y-4">
+          <motion.div variants={staggerItem} className="lg:col-span-4 space-y-4">
             <QRVerificationCard
               batchId={batch_id}
               qrUrl={data?.result.qrUrl}
               verificationUrl={data?.result.verificationUrl}
             />
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
     </PageShell>
   );

@@ -13,7 +13,9 @@ import { Scan, BoundingBox } from '@/types/scan';
 import { ComplianceCheck } from '@/types/compliance';
 import { DecisionTrace } from '@/types/evidence';
 import { ROUTES } from '@/constants/routes';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, RotateCcw, FileText, Target, ShieldCheck, GitCommit } from 'lucide-react';
+import { butterSpring, pageFadeSlide, gpuAcceleratedStyle } from '@/animations/motion';
 
 export const ScanDetailPage: React.FC = () => {
   const { id = 'scn_sample_cereal' } = useParams<{ id: string }>();
@@ -253,80 +255,125 @@ export const ScanDetailPage: React.FC = () => {
 
           {/* RIGHT COLUMN: Tabbed Compliance Assessment, Evidence Panel & Decision Trace */}
           <div className="lg:col-span-6 xl:col-span-5 space-y-4">
-            {/* Workspace Navigation Tabs */}
-            <div className="flex items-center gap-1 p-1 rounded bg-surface-muted border border-border">
+            {/* Workspace Navigation Tabs with Liquid Sliding Spring Indicator */}
+            <div className="relative flex items-center gap-1 p-1 rounded bg-surface-muted border border-border">
               <button
                 type="button"
                 onClick={() => setActiveTab('assessment')}
-                className={`flex-1 py-1.5 px-3 text-xs font-semibold rounded transition-colors flex items-center justify-center gap-1.5 ${
-                  activeTab === 'assessment'
-                    ? 'bg-surface text-foreground shadow-subtle'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-foreground'
-                }`}
+                className="relative flex-1 py-1.5 px-3 text-xs font-semibold rounded flex items-center justify-center gap-1.5 z-10 transition-colors"
               >
-                <ShieldCheck size={14} className="text-primary" />
-                <span>Compliance ({complianceResult.checks.length})</span>
+                {activeTab === 'assessment' && (
+                  <motion.span
+                    layoutId="activeScanTabPill"
+                    transition={butterSpring}
+                    className="absolute inset-0 bg-surface rounded shadow-subtle border border-border/50 -z-10"
+                  />
+                )}
+                <ShieldCheck size={14} className={activeTab === 'assessment' ? 'text-primary' : 'text-slate-400'} />
+                <span className={activeTab === 'assessment' ? 'text-foreground' : 'text-slate-600 dark:text-slate-400'}>
+                  Compliance ({complianceResult.checks.length})
+                </span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setActiveTab('evidence')}
-                className={`flex-1 py-1.5 px-3 text-xs font-semibold rounded transition-colors flex items-center justify-center gap-1.5 ${
-                  activeTab === 'evidence'
-                    ? 'bg-surface text-foreground shadow-subtle'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-foreground'
-                }`}
+                className="relative flex-1 py-1.5 px-3 text-xs font-semibold rounded flex items-center justify-center gap-1.5 z-10 transition-colors"
               >
-                <Target size={14} className="text-primary" />
-                <span>Evidence Telemetry</span>
+                {activeTab === 'evidence' && (
+                  <motion.span
+                    layoutId="activeScanTabPill"
+                    transition={butterSpring}
+                    className="absolute inset-0 bg-surface rounded shadow-subtle border border-border/50 -z-10"
+                  />
+                )}
+                <Target size={14} className={activeTab === 'evidence' ? 'text-primary' : 'text-slate-400'} />
+                <span className={activeTab === 'evidence' ? 'text-foreground' : 'text-slate-600 dark:text-slate-400'}>
+                  Evidence Telemetry
+                </span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setActiveTab('trace')}
-                className={`flex-1 py-1.5 px-3 text-xs font-semibold rounded transition-colors flex items-center justify-center gap-1.5 ${
-                  activeTab === 'trace'
-                    ? 'bg-surface text-foreground shadow-subtle'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-foreground'
-                }`}
+                className="relative flex-1 py-1.5 px-3 text-xs font-semibold rounded flex items-center justify-center gap-1.5 z-10 transition-colors"
               >
-                <GitCommit size={14} className="text-primary" />
-                <span>Decision Trace</span>
+                {activeTab === 'trace' && (
+                  <motion.span
+                    layoutId="activeScanTabPill"
+                    transition={butterSpring}
+                    className="absolute inset-0 bg-surface rounded shadow-subtle border border-border/50 -z-10"
+                  />
+                )}
+                <GitCommit size={14} className={activeTab === 'trace' ? 'text-primary' : 'text-slate-400'} />
+                <span className={activeTab === 'trace' ? 'text-foreground' : 'text-slate-600 dark:text-slate-400'}>
+                  Decision Trace
+                </span>
               </button>
             </div>
 
-            {/* Tab 1: Compliance Assessment (Violations & Checklist) */}
-            {activeTab === 'assessment' && (
-              <ComplianceAssessment
-                overallStatus={complianceResult.overallStatus}
-                score={complianceResult.score}
-                checks={complianceResult.checks}
-                violations={complianceResult.violations}
-                selectedCheckId={selectedCheckId}
-                onSelectCheck={handleSelectCheck}
-                onFocusRegion={handleFocusRegion}
-                onViewTrace={handleViewTrace}
-              />
-            )}
+            {/* AnimatePresence for Butter-Smooth Tab Switching */}
+            <AnimatePresence mode="wait">
+              {/* Tab 1: Compliance Assessment (Violations & Checklist) */}
+              {activeTab === 'assessment' && (
+                <motion.div
+                  key="assessment"
+                  variants={pageFadeSlide}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  style={gpuAcceleratedStyle}
+                >
+                  <ComplianceAssessment
+                    overallStatus={complianceResult.overallStatus}
+                    score={complianceResult.score}
+                    checks={complianceResult.checks}
+                    violations={complianceResult.violations}
+                    selectedCheckId={selectedCheckId}
+                    onSelectCheck={handleSelectCheck}
+                    onFocusRegion={handleFocusRegion}
+                    onViewTrace={handleViewTrace}
+                  />
+                </motion.div>
+              )}
 
-            {/* Tab 2: Evidence Panel (Telemetry & Extracted Confidence) */}
-            {activeTab === 'evidence' && (
-              <EvidencePanel
-                region={currentRegion}
-                field={currentField}
-                check={currentCheck}
-                onOpenDecisionTrace={handleViewTrace}
-              />
-            )}
+              {/* Tab 2: Evidence Panel (Telemetry & Extracted Confidence) */}
+              {activeTab === 'evidence' && (
+                <motion.div
+                  key="evidence"
+                  variants={pageFadeSlide}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  style={gpuAcceleratedStyle}
+                >
+                  <EvidencePanel
+                    region={currentRegion}
+                    field={currentField}
+                    check={currentCheck}
+                    onOpenDecisionTrace={handleViewTrace}
+                  />
+                </motion.div>
+              )}
 
-            {/* Tab 3: Decision Trace Panel (Conditions & Cryptographic Ledger Proof) */}
-            {activeTab === 'trace' && (
-              <DecisionTracePanel
-                trace={activeTrace}
-                isLoading={isTraceLoading}
-                onClose={() => setActiveTab('assessment')}
-              />
-            )}
+              {/* Tab 3: Decision Trace Panel (Conditions & Cryptographic Ledger Proof) */}
+              {activeTab === 'trace' && (
+                <motion.div
+                  key="trace"
+                  variants={pageFadeSlide}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  style={gpuAcceleratedStyle}
+                >
+                  <DecisionTracePanel
+                    trace={activeTrace}
+                    isLoading={isTraceLoading}
+                    onClose={() => setActiveTab('assessment')}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       ) : (

@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/Card';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/Button';
 import { ComplianceReport } from '@/types/compliance';
 import { buildRoute } from '@/constants/routes';
 import { FileText, Printer, FileCheck2, Search, ExternalLink, Calendar } from 'lucide-react';
+import { staggerContainer, staggerItem, gpuAcceleratedStyle } from '@/animations/motion';
 
 interface ReportListProps {
   reports: ComplianceReport[];
@@ -57,7 +59,7 @@ export const ReportList: React.FC<ReportListProps> = ({ reports, onSelectReport,
         </div>
       </div>
 
-      {/* Reports Grid */}
+      {/* Reports Grid with Staggered Entrance */}
       {loading ? (
         <div className="p-12 text-center text-xs text-slate-500 font-mono">
           Loading compliance inspection dossiers...
@@ -67,9 +69,16 @@ export const ReportList: React.FC<ReportListProps> = ({ reports, onSelectReport,
           No statutory compliance reports found matching current filters.
         </div>
       ) : (
-        <div className="space-y-4">
+        <motion.div
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+          style={gpuAcceleratedStyle}
+          className="space-y-4"
+        >
           {filtered.map((report) => (
-            <Card key={report.id} className="border border-border hover:border-primary/80 transition-all">
+            <motion.div key={report.id} variants={staggerItem}>
+              <Card interactive className="border border-border hover:border-primary/80 transition-all group">
               <CardHeader className="pb-2">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div className="flex items-center gap-3">
@@ -142,9 +151,10 @@ export const ReportList: React.FC<ReportListProps> = ({ reports, onSelectReport,
                 </div>
               </CardFooter>
             </Card>
-          ))}
-        </div>
-      )}
-    </div>
+          </motion.div>
+        ))}
+      </motion.div>
+    )}
+  </div>
   );
 };

@@ -14,6 +14,9 @@ export default defineConfig({
     port: 3000,
     open: false,
   },
+  css: {
+    postcss: './postcss.config.js',
+  },
   build: {
     chunkSizeWarningLimit: 600,
     rollupOptions: {

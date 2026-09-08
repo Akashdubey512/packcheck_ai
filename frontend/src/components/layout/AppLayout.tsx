@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 
 export const AppLayout: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const isLandingPage = location.pathname === '/' || location.pathname === '';
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground font-sans">
+    <div className="min-h-screen flex flex-col bg-background text-foreground font-sans ambient-glow-bg">
       {/* Skip to Main Content link for keyboard accessibility */}
       <a
         href="#main-content"
@@ -17,18 +19,28 @@ export const AppLayout: React.FC = () => {
       </a>
 
       <Header
-        onToggleMobileMenu={() => setMobileMenuOpen((prev) => !prev)}
+        onToggleMobileMenu={isLandingPage ? undefined : () => setMobileMenuOpen((prev) => !prev)}
         isMobileMenuOpen={mobileMenuOpen}
+        isLandingPage={isLandingPage}
       />
       <div className="flex flex-1 overflow-hidden relative">
-        <Sidebar
-          mobileOpen={mobileMenuOpen}
-          onCloseMobile={() => setMobileMenuOpen(false)}
-        />
-        <main id="main-content" tabIndex={-1} className="flex-1 overflow-y-auto bg-background outline-none">
+        {!isLandingPage && (
+          <Sidebar
+            mobileOpen={mobileMenuOpen}
+            onCloseMobile={() => setMobileMenuOpen(false)}
+          />
+        )}
+        <main
+          id="main-content"
+          tabIndex={-1}
+          className={`flex-1 overflow-y-auto bg-background outline-none ${
+            isLandingPage ? 'w-full' : ''
+          }`}
+        >
           <Outlet />
         </main>
       </div>
     </div>
   );
 };
+

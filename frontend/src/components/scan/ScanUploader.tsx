@@ -4,6 +4,9 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { PRESET_LABEL_SAMPLES, PresetLabelSample } from '@/utils/sampleLabels';
 
+import { motion } from 'framer-motion';
+import { staggerContainer, staggerItem, gpuAcceleratedStyle } from '@/animations/motion';
+
 interface ScanUploaderProps {
   onFileSelected: (file: File, sampleId?: string) => void;
   isUploading?: boolean;
@@ -57,8 +60,14 @@ export const ScanUploader: React.FC<ScanUploaderProps> = ({ onFileSelected, isUp
 
   return (
     <div className="space-y-6">
-      {/* Primary Dropzone */}
-      <div
+      {/* Primary Dropzone with 120 FPS Drag Dynamics */}
+      <motion.div
+        animate={{
+          scale: isDragOver ? 1.015 : 1,
+          borderColor: isDragOver ? 'var(--color-primary)' : 'var(--color-border)',
+        }}
+        transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+        style={gpuAcceleratedStyle}
         onDragOver={(e) => {
           e.preventDefault();
           setIsDragOver(true);
@@ -67,8 +76,8 @@ export const ScanUploader: React.FC<ScanUploaderProps> = ({ onFileSelected, isUp
         onDrop={handleDrop}
         className={`relative border-2 border-dashed rounded-lg p-8 sm:p-12 text-center transition-colors select-none ${
           isDragOver
-            ? 'border-primary bg-surface-muted ring-2 ring-primary/20'
-            : 'border-border hover:border-slate-400 dark:hover:border-slate-600 bg-surface'
+            ? 'bg-surface-muted ring-2 ring-primary/20 shadow-lg'
+            : 'hover:border-slate-400 dark:hover:border-slate-600 bg-surface shadow-subtle'
         }`}
       >
         <input
@@ -141,7 +150,7 @@ export const ScanUploader: React.FC<ScanUploaderProps> = ({ onFileSelected, isUp
             <span>{errorMessage}</span>
           </div>
         )}
-      </div>
+      </motion.div>
 
       {/* Demonstration Datasets Section */}
       <div className="space-y-3">
@@ -155,7 +164,12 @@ export const ScanUploader: React.FC<ScanUploaderProps> = ({ onFileSelected, isUp
           <span className="text-2xs text-slate-500 font-mono">1-Click Test Loads</span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <motion.div
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+          className="grid grid-cols-1 md:grid-cols-3 gap-3"
+        >
           {PRESET_LABEL_SAMPLES.map((sample) => {
             const statusBadgeColors = {
               violation: 'bg-violation-surface text-violation-foreground border-violation-border',
@@ -170,29 +184,31 @@ export const ScanUploader: React.FC<ScanUploaderProps> = ({ onFileSelected, isUp
             }[sample.status];
 
             return (
-              <Card
-                key={sample.id}
-                className="cursor-pointer hover:border-primary/80 transition-all text-left flex flex-col justify-between"
-                onClick={() => handlePresetSelect(sample)}
-              >
-                <div className="p-3.5 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className={`text-2xs font-semibold px-2 py-0.5 rounded border uppercase ${statusBadgeColors}`}>
-                      {statusText}
-                    </span>
-                    <span className="text-2xs font-mono text-slate-400">{sample.category}</span>
+              <motion.div key={sample.id} variants={staggerItem}>
+                <Card
+                  interactive
+                  className="text-left flex flex-col justify-between h-full group"
+                  onClick={() => handlePresetSelect(sample)}
+                >
+                  <div className="p-3.5 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className={`text-2xs font-semibold px-2 py-0.5 rounded border uppercase font-mono ${statusBadgeColors}`}>
+                        {statusText}
+                      </span>
+                      <span className="text-2xs font-mono text-slate-400">{sample.category}</span>
+                    </div>
+                    <h4 className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors leading-snug">{sample.name}</h4>
+                    <p className="text-2xs text-slate-500 line-clamp-2 leading-relaxed">{sample.description}</p>
                   </div>
-                  <h4 className="text-xs font-semibold text-foreground leading-snug">{sample.name}</h4>
-                  <p className="text-2xs text-slate-500 line-clamp-2 leading-relaxed">{sample.description}</p>
-                </div>
-                <div className="p-3 border-t border-border bg-surface-subtle/60 flex items-center justify-between text-2xs text-slate-600 dark:text-slate-400">
-                  <span>Load Demo Case</span>
-                  <span className="font-semibold text-primary">Inspect →</span>
-                </div>
-              </Card>
+                  <div className="p-3 border-t border-border bg-surface-subtle/60 flex items-center justify-between text-2xs text-slate-600 dark:text-slate-400">
+                    <span>Load Demo Case</span>
+                    <span className="font-semibold text-primary group-hover:translate-x-1 transition-transform inline-flex items-center">Inspect →</span>
+                  </div>
+                </Card>
+              </motion.div>
             );
           })}
-        </div>
+        </motion.div>
       </div>
     </div>
   );

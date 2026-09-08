@@ -49,12 +49,30 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
       {/* Visual Image Preview */}
       <div className="lg:col-span-6 space-y-3">
         <Card className="overflow-hidden border border-border">
-          <div className="bg-slate-900/5 dark:bg-slate-950 p-4 flex items-center justify-center min-h-[380px] max-h-[500px] overflow-hidden">
+          <div className="bg-slate-900/5 dark:bg-surface-subtle p-4 flex items-center justify-center min-h-[380px] max-h-[500px] overflow-hidden relative group">
             <img
               src={previewUrl}
               alt="Pre-flight Label Preview"
-              className="max-h-[460px] w-auto object-contain rounded border border-border shadow-sm"
+              className="max-h-[460px] w-auto object-contain rounded border border-border shadow-sm transition-transform duration-300 group-hover:scale-[1.01]"
             />
+
+            {/* High-Tech 120 FPS Laser Scanner HUD Overlay */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden rounded">
+              {/* Vertical Sweep Laser Line */}
+              <div className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-sky-400 to-transparent shadow-[0_0_16px_3px_rgba(56,189,248,0.7)] animate-laser opacity-90" />
+              {/* Corner HUD Reticles */}
+              <div className="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 border-sky-400/80" />
+              <div className="absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2 border-sky-400/80" />
+              <div className="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 border-sky-400/80" />
+              <div className="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-sky-400/80" />
+              <div className="absolute top-5 left-12 font-mono text-[10px] text-sky-400/90 font-bold tracking-widest uppercase flex items-center gap-1.5">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-beacon absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-sky-500"></span>
+                </span>
+                OPTICAL INSPECTION ACTIVE // 120 FPS
+              </div>
+            </div>
           </div>
           <div className="p-3 border-t border-border bg-surface flex flex-wrap items-center justify-between text-2xs text-slate-500 font-mono">
             <span>FILE: {file.name}</span>

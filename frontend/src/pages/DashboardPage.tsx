@@ -9,22 +9,22 @@ import {
   RecentInspections,
   DashboardSkeleton,
 } from '@/components/dashboard';
-import { DashboardService } from '@/services/dashboardService';
+import { DashboardService, DEMO_DASHBOARD_METRICS } from '@/services/dashboardService';
 import { DashboardMetrics } from '@/types/dashboard';
 import { RotateCw, AlertTriangle } from 'lucide-react';
 
 export const DashboardPage: React.FC = () => {
-  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [metrics, setMetrics] = useState<DashboardMetrics>(DEMO_DASHBOARD_METRICS);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fetchMetrics = useCallback(() => {
-    setLoading(true);
+    setIsRefreshing(true);
     setError(null);
     DashboardService.getMetrics()
       .then((data) => setMetrics(data))
       .catch(() => setError('Failed to communicate with national compliance analytics service.'))
-      .finally(() => setLoading(false));
+      .finally(() => setIsRefreshing(false));
   }, []);
 
   useEffect(() => {
@@ -37,14 +37,12 @@ export const DashboardPage: React.FC = () => {
       description="Consolidated packaging compliance rates, inspection volume trends, and statutory infraction alerts."
       badge={<StatusBadge status="compliant" customText="Live Telemetry" size="sm" />}
       actions={
-        <Button size="sm" variant="outline" onClick={fetchMetrics} disabled={loading}>
-          <RotateCw size={13} className={`mr-1.5 ${loading ? 'animate-spin' : ''}`} /> Refresh Metrics
+        <Button size="sm" variant="outline" onClick={fetchMetrics} disabled={isRefreshing}>
+          <RotateCw size={13} className={`mr-1.5 ${isRefreshing ? 'animate-spin' : ''}`} /> Refresh Metrics
         </Button>
       }
     >
-      {loading ? (
-        <DashboardSkeleton />
-      ) : error ? (
+      {error && !metrics ? (
         <div className="p-12 text-center rounded border border-violation-border bg-violation-surface text-violation-foreground space-y-3">
           <AlertTriangle size={24} className="mx-auto" />
           <div className="font-semibold text-sm">{error}</div>
@@ -66,7 +64,10 @@ export const DashboardPage: React.FC = () => {
           {/* 3. Live Inspections Stream */}
           <RecentInspections recentActivity={metrics.recentActivity} />
         </div>
-      ) : null}
+      ) : (
+        <DashboardSkeleton />
+      )}
     </PageShell>
   );
 };
+

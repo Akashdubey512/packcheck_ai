@@ -62,3 +62,162 @@
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-primary);
 }
+
+/* 120 FPS HARDWARE-ACCELERATED COMPOSITOR UTILITIES */
+.gpu-layer {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  will-change: transform, opacity;
+}
+
+/* High-Tech Regulatory Laser Scan Animation (120 FPS Smooth) */
+@keyframes laserSweep {
+  0% {
+    transform: translateY(0);
+    opacity: 0.85;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0.85;
+  }
+}
+
+.animate-laser {
+  animation: laserSweep 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+  will-change: transform;
+}
+
+/* Status Indicator Beacon Pulse (Compositor thread, zero reflow) */
+@keyframes beaconPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.4;
+  }
+}
+
+.animate-beacon {
+  animation: beaconPulse 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  will-change: transform, opacity;
+}
+
+/* Micro-interaction card shimmer sheen */
+@keyframes shimmerPass {
+  0% {
+    transform: translateX(-100%) rotate(25deg);
+  }
+  100% {
+    transform: translateX(200%) rotate(25deg);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmerPass 2.8s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+/* Optical Radar Sweep (360-degree rotation on compositor thread) */
+@keyframes radarSweep {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-radar {
+  animation: radarSweep 4s linear infinite;
+  will-change: transform;
+}
+
+/* Audio/Optical Telemetry Waveform Oscillation (120 FPS) */
+@keyframes waveOscillate {
+  0%, 100% {
+    transform: scaleY(0.25);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.animate-wave-1 {
+  animation: waveOscillate 0.8s ease-in-out infinite;
+  transform-origin: bottom;
+}
+
+.animate-wave-2 {
+  animation: waveOscillate 1.1s ease-in-out infinite 0.15s;
+  transform-origin: bottom;
+}
+
+.animate-wave-3 {
+  animation: waveOscillate 0.7s ease-in-out infinite 0.3s;
+  transform-origin: bottom;
+}
+
+.animate-wave-4 {
+  animation: waveOscillate 1.3s ease-in-out infinite 0.1s;
+  transform-origin: bottom;
+}
+
+/* Subtle Hover Floating Elevation */
+@keyframes floatSubtle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.animate-float {
+  animation: floatSubtle 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Breathing Border Glow for Active Inspection Elements */
+@keyframes borderGlowPulse {
+  0%, 100% {
+    border-color: rgba(56, 189, 248, 0.25);
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.05);
+  }
+  50% {
+    border-color: rgba(56, 189, 248, 0.6);
+    box-shadow: 0 0 25px rgba(56, 189, 248, 0.15);
+  }
+}
+
+.glow-active {
+  animation: borderGlowPulse 3s ease-in-out infinite;
+}
+
+/* High-Precision Cyber Grid Background */
+.tech-grid-pattern {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
+
+/* Sleek Glassmorphism Panel */
+.glass-panel {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background-color: rgba(40, 40, 40, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Subtle ambient backdrop mesh glow for #282828 canvas */
+.ambient-glow-bg {
+  background: 
+    radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.06) 0%, transparent 60%),
+    radial-gradient(circle at 100% 100%, rgba(52, 211, 153, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 0% 50%, rgba(99, 102, 241, 0.03) 0%, transparent 40%);
+}
+

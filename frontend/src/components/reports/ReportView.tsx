@@ -1,11 +1,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Card, CardFooter } from '@/components/ui/Card';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/Button';
 import { ComplianceReport } from '@/types/compliance';
 import { buildRoute } from '@/constants/routes';
 import { formatGTIN } from '@/utils/formatters';
+import { butterSpring, gpuAcceleratedStyle } from '@/animations/motion';
 import {
   ShieldCheck,
   Printer,
@@ -62,19 +64,36 @@ export const ReportView: React.FC<ReportViewProps> = ({ report, onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 bg-slate-950/70 z-50 overflow-y-auto p-4 sm:p-6 flex items-center justify-center"
+      className="fixed inset-0 z-50 overflow-y-auto p-4 sm:p-6 flex items-center justify-center"
       role="dialog"
       aria-modal="true"
       aria-label={`Regulatory Compliance Report ${report.id}`}
     >
-      <Card className="max-w-4xl w-full bg-surface border border-border shadow-modal relative max-h-[90vh] flex flex-col print:border-none print:shadow-none print:max-h-none print:static">
-        {/* Modal Top Actions (Hidden in Print) */}
-        <div className="flex items-center justify-between p-4 border-b border-border bg-surface-muted/50 print:hidden shrink-0">
-          <div className="flex items-center gap-2">
-            <span className="text-2xs font-mono font-bold text-slate-500 uppercase">
-              Regulatory Compliance Report // {report.id}
-            </span>
-          </div>
+      {/* Backdrop */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        onClick={onClose}
+        className="fixed inset-0 bg-slate-950/75 backdrop-blur-xs print:hidden"
+      />
+
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96, y: 15 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={butterSpring}
+        style={gpuAcceleratedStyle}
+        className="max-w-4xl w-full relative z-10 print:static print:max-w-none"
+      >
+        <Card className="w-full bg-surface border border-border shadow-modal relative max-h-[90vh] flex flex-col print:border-none print:shadow-none print:max-h-none print:static">
+          {/* Modal Top Actions (Hidden in Print) */}
+          <div className="flex items-center justify-between p-4 border-b border-border bg-surface-muted/50 print:hidden shrink-0">
+            <div className="flex items-center gap-2">
+              <span className="text-2xs font-mono font-bold text-slate-500 uppercase">
+                Regulatory Compliance Report // {report.id}
+              </span>
+            </div>
 
           <div className="flex items-center gap-2">
             <Button size="sm" variant="outline" onClick={handlePrint} title="Print report or save as PDF" aria-label="Print report or save as PDF">
@@ -262,7 +281,8 @@ export const ReportView: React.FC<ReportViewProps> = ({ report, onClose }) => {
             </Button>
           </CardFooter>
         )}
-      </Card>
+        </Card>
+      </motion.div>
     </div>
   );
 };
