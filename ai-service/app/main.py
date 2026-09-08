@@ -8,7 +8,9 @@ import shutil
 import tempfile
 from pathlib import Path
 from typing import List, Optional
+from pydantic import BaseModel
 from fastapi import FastAPI, File, UploadFile, HTTPException, Depends
+
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
 
@@ -151,6 +153,88 @@ async def download_pdf_report(inspection_id: str):
         filename=f"Compliance_Report_{inspection_id}.pdf"
     )
 
+import base64
+
+class LegacyAnalyzeRequest(BaseModel):
+    image_base64: str
+    panel_width_cm: Optional[float] = None
+    panel_height_cm: Optional[float] = None
+
+@app.post("/analyze")
+async def analyze_package_legacy(payload: LegacyAnalyzeRequest):
+    """
+    Backwards-compatible endpoint for Node.js backend per docs/api-contract.md.
+    Accepts base64 image, processes through inspection pipeline, and returns contract JSON.
+    """
+    if not payload.image_base64:
+        raise HTTPException(status_code=400, detail="Missing image_base64 payload")
+
+    temp_path = None
+    try:
+        raw_b64 = payload.image_base64
+        if "," in raw_b64:
+            raw_b64 = raw_b64.split(",", 1)[1]
+        image_bytes = base64.b64decode(raw_b64)
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp:
+            tmp.write(image_bytes)
+            temp_path = Path(tmp.name)
+
+        validate_upload_file(temp_path)
+        result = pipeline.inspect_images([temp_path])
+        res_dict = result.to_dict()
+
+        # Map to declarations dictionary required by docs/api-contract.md
+        statutory_fields = [
+            "manufacturer_name_address",
+            "net_quantity",
+            "mrp",
+            "mfg_date",
+            "consumer_care",
+            "country_of_origin",
+            "generic_name",
+            "unit_sale_price",
+        ]
+        declarations = {}
+        for fld in statutory_fields:
+            item = res_dict.get("unified_facts", {}).get(fld, {})
+            val = item.get("consensus_value")
+            found = bool(val and str(val).strip())
+            conf = float(item.get("mean_confidence", 0.85)) if found else 0.0
+            declarations[fld] = {
+                "found": found,
+                "value": str(val) if found else None,
+                "confidence": round(conf, 2)
+            }
+
+        violations = []
+        for v in res_dict.get("compliance_result", {}).get("violations", []):
+            if isinstance(v, dict):
+                violations.append(v.get("message") or v.get("rule_name") or str(v))
+            else:
+                violations.append(str(v))
+
+        raw_status = res_dict.get("overall_status", "NON_COMPLIANT")
+        overall_status = "COMPLIANT" if raw_status in ("PASS", "COMPLIANT") else "NON_COMPLIANT"
+
+        return {
+            "extracted_text": "",
+            "declarations": declarations,
+            "overall_status": overall_status,
+            "violations": violations
+        }
+    except SecurityValidationError as se:
+        raise HTTPException(status_code=400, detail=f"Security error: {str(se)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
+    finally:
+        if temp_path and temp_path.exists():
+            try:
+                temp_path.unlink()
+            except Exception:
+                pass
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)
+
