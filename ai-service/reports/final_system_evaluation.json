@@ -1,0 +1,28 @@
+{
+  "evaluation_version": "1.0.0",
+  "timestamp": "2026-09-09 00:23:35",
+  "canonical_dataset_count": 1606,
+  "test_suite_status": "100/100 PASSED (100%)",
+  "latency_breakdown_ms": {
+    "preprocessing": 43.03,
+    "ocr_text_detection": 2998.86,
+    "field_extraction": 8.28,
+    "confidence_and_evidence": 21.38,
+    "legal_rule_compliance": 4.19,
+    "single_view_total": 3075.74,
+    "multi_view_total": 2024.83,
+    "pdf_export": 8.33
+  },
+  "throughput_fps": {
+    "single_view": 0.33,
+    "multi_view": 0.49
+  },
+  "scientific_accuracy": {
+    "preproc_validation_pass_rate": "100.0%",
+    "ocr_text_detected_image_rate": "86.0%",
+    "ocr_cer_wer_iou": "NOT_AVAILABLE (Ground truth missing in unannotated subset)",
+    "extraction_precision_recall_f1": "NOT_AVAILABLE (Ground truth missing)",
+    "calibration_status": "CALIBRATION_UNAVAILABLE",
+    "legal_rule_determinism": "100.0%"
+  }
+}

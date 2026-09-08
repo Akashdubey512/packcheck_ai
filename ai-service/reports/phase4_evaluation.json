@@ -1,0 +1,35 @@
+{
+  "phase": 4,
+  "title": "Phase 4 Mandatory Field Extraction Evaluation Report",
+  "ground_truth_status": "NOT_AVAILABLE",
+  "audit_details": {
+    "datasets_inspected": [
+      "Product Description English/Hindi OCR",
+      "SROIE",
+      "CORD-v2",
+      "Open Food Facts India",
+      "Label Extraction Dataset"
+    ],
+    "field_level_gt_available": false,
+    "reason": "Dataset Audit Finding: 1. SROIE dataset contains receipt key-values ('company', 'date', 'address', 'total'), not the 9 mandatory Legal Metrology packaged commodity fields.\n2. Product Description English/Hindi OCR dataset contains full text line transcripts, not field-level entity bounding boxes or 9 field annotations.\n3. Open Food Facts India contains product-level metadata but lacks OCR region-level field annotations for model evaluation.\nAs per Step 13 & Step 14 strict rules: Field-level ground truth is NOT_AVAILABLE. Fabrication of ground truth annotations or fake metrics is strictly prohibited.",
+    "status": "NOT_AVAILABLE"
+  },
+  "metrics": {
+    "field_precision": "NOT_AVAILABLE",
+    "field_recall": "NOT_AVAILABLE",
+    "field_f1": "NOT_AVAILABLE",
+    "exact_match": "NOT_AVAILABLE",
+    "normalized_exact_match": "NOT_AVAILABLE",
+    "per_field_performance": {
+      "manufacturer_name_and_address": "NOT_AVAILABLE",
+      "country_of_origin": "NOT_AVAILABLE",
+      "common_generic_name": "NOT_AVAILABLE",
+      "net_quantity": "NOT_AVAILABLE",
+      "manufacturing_packing_date": "NOT_AVAILABLE",
+      "best_before_expiry": "NOT_AVAILABLE",
+      "mrp": "NOT_AVAILABLE",
+      "consumer_care_details": "NOT_AVAILABLE",
+      "unit_sale_price": "NOT_AVAILABLE"
+    }
+  }
+}

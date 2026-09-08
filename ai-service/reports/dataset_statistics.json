@@ -1,0 +1,135 @@
+{
+  "Legal Metrology Rules": {
+    "total_files": 1,
+    "image_count": 0,
+    "valid_images": 0,
+    "corrupted_images": 0,
+    "exact_duplicates": 0,
+    "near_duplicates": 0,
+    "image_stats": {}
+  },
+  "Open Food Facts (India)": {
+    "total_files": 115,
+    "image_count": 114,
+    "valid_images": 114,
+    "corrupted_images": 0,
+    "exact_duplicates": 0,
+    "near_duplicates": 0,
+    "image_stats": {
+      "width_min": 114,
+      "width_max": 400,
+      "width_mean": 293.19,
+      "width_std": 80.29,
+      "height_min": 104,
+      "height_max": 400,
+      "height_mean": 369.72,
+      "height_std": 69.57,
+      "channels_min": 3,
+      "channels_max": 3,
+      "aspect_ratio_min": 0.285,
+      "aspect_ratio_max": 3.8462,
+      "aspect_ratio_mean": 0.89
+    }
+  },
+  "SROIE Receipt Dataset": {
+    "total_files": 1086,
+    "image_count": 1083,
+    "valid_images": 1083,
+    "corrupted_images": 0,
+    "exact_duplicates": 0,
+    "near_duplicates": 0,
+    "image_stats": {
+      "width_min": 9,
+      "width_max": 1540,
+      "width_mean": 93.03,
+      "width_std": 88.84,
+      "height_min": 6,
+      "height_max": 728,
+      "height_mean": 59.9,
+      "height_std": 45.09,
+      "channels_min": 3,
+      "channels_max": 3,
+      "aspect_ratio_min": 0.3519,
+      "aspect_ratio_max": 4.8235,
+      "aspect_ratio_mean": 1.56
+    }
+  },
+  "Product Description OCR": {
+    "total_files": 760,
+    "image_count": 380,
+    "valid_images": 380,
+    "corrupted_images": 0,
+    "exact_duplicates": 1,
+    "near_duplicates": 2,
+    "image_stats": {
+      "width_min": 1440,
+      "width_max": 5120,
+      "width_mean": 3132.33,
+      "width_std": 754.02,
+      "height_min": 1080,
+      "height_max": 5120,
+      "height_mean": 3463.76,
+      "height_std": 600.86,
+      "channels_min": 3,
+      "channels_max": 3,
+      "aspect_ratio_min": 0.452,
+      "aspect_ratio_max": 2.1132,
+      "aspect_ratio_mean": 0.93
+    }
+  },
+  "Indian Scene Text": {
+    "total_files": 36,
+    "image_count": 17,
+    "valid_images": 17,
+    "corrupted_images": 0,
+    "exact_duplicates": 0,
+    "near_duplicates": 0,
+    "image_stats": {
+      "width_min": 193,
+      "width_max": 750,
+      "width_mean": 309.29,
+      "width_std": 185.94,
+      "height_min": 50,
+      "height_max": 455,
+      "height_mean": 188.47,
+      "height_std": 153.31,
+      "channels_min": 3,
+      "channels_max": 4,
+      "aspect_ratio_min": 0.8684,
+      "aspect_ratio_max": 4.0,
+      "aspect_ratio_mean": 2.37
+    }
+  },
+  "CORD-v2 Layout Dataset": {
+    "total_files": 2,
+    "image_count": 0,
+    "valid_images": 0,
+    "corrupted_images": 0,
+    "exact_duplicates": 0,
+    "near_duplicates": 0,
+    "image_stats": {}
+  },
+  "Label Extraction ViT": {
+    "total_files": 12,
+    "image_count": 9,
+    "valid_images": 9,
+    "corrupted_images": 0,
+    "exact_duplicates": 0,
+    "near_duplicates": 0,
+    "image_stats": {
+      "width_min": 387,
+      "width_max": 1247,
+      "width_mean": 887.11,
+      "width_std": 286.07,
+      "height_min": 364,
+      "height_max": 757,
+      "height_mean": 611.44,
+      "height_std": 136.94,
+      "channels_min": 4,
+      "channels_max": 4,
+      "aspect_ratio_min": 0.9699,
+      "aspect_ratio_max": 2.2527,
+      "aspect_ratio_mean": 1.47
+    }
+  }
+}

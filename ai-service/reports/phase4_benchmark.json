@@ -1,0 +1,22 @@
+{
+  "total_images": 100,
+  "successful_runs": 85,
+  "success_rate_percent": 85.0,
+  "full_pipeline": {
+    "avg_latency_ms": 874.05,
+    "median_latency_ms": 732.69,
+    "p95_latency_ms": 1733.33,
+    "throughput_images_per_sec": 1.14
+  },
+  "extraction_only": {
+    "avg_latency_ms": 0.11,
+    "median_latency_ms": 0.04,
+    "p95_latency_ms": 0.39,
+    "throughput_images_per_sec": 8715.45
+  },
+  "memory": {
+    "ram_start_mb": 391.56,
+    "ram_end_mb": 407.52,
+    "ram_delta_mb": 15.96
+  }
+}

@@ -1,0 +1,89 @@
+{
+  "product_id": "PROD_IND_8901234567890",
+  "inspection_id": "INSP_GT_001",
+  "category": "food",
+  "brand": "SampleBrand",
+  "product_type": "Packaged Snacks",
+  "view_id": "BACK",
+  "image_id": "prod_8901234567890_back.jpg",
+  "declarations": {
+    "manufacturer_name_and_address": {
+      "raw_text": "Mfg by: XYZ Foods Pvt Ltd, Plot 42, MIDC, Mumbai - 400093",
+      "normalized_value": {
+        "name": "XYZ Foods Pvt Ltd",
+        "address": "Plot 42, MIDC, Mumbai - 400093"
+      },
+      "bbox": [50, 100, 750, 140],
+      "is_present": true,
+      "presence_flag": "PRESENT",
+      "rule_compliance_gt": "COMPLIANT"
+    },
+    "country_of_origin": {
+      "raw_text": "Made in India",
+      "normalized_value": "India",
+      "bbox": [50, 150, 300, 180],
+      "is_present": true,
+      "presence_flag": "PRESENT",
+      "rule_compliance_gt": "COMPLIANT"
+    },
+    "common_generic_name": {
+      "raw_text": "Generic Name: Roasted Potato Chips",
+      "normalized_value": "Roasted Potato Chips",
+      "bbox": [50, 190, 450, 220],
+      "is_present": true,
+      "presence_flag": "PRESENT",
+      "rule_compliance_gt": "COMPLIANT"
+    },
+    "net_quantity": {
+      "raw_text": "Net Qty: 200 g",
+      "normalized_value": {"value": 200.0, "unit": "g"},
+      "bbox": [50, 230, 250, 260],
+      "is_present": true,
+      "presence_flag": "PRESENT",
+      "rule_compliance_gt": "COMPLIANT"
+    },
+    "manufacturing_packing_date": {
+      "raw_text": "Mfg Date: 08/2026",
+      "normalized_value": "2026-08",
+      "bbox": [50, 270, 300, 300],
+      "is_present": true,
+      "presence_flag": "PRESENT",
+      "rule_compliance_gt": "COMPLIANT"
+    },
+    "best_before_expiry": {
+      "raw_text": "Use By: 08/2027",
+      "normalized_value": "2027-08",
+      "bbox": [50, 310, 300, 340],
+      "is_present": true,
+      "presence_flag": "PRESENT",
+      "rule_compliance_gt": "COMPLIANT"
+    },
+    "mrp": {
+      "raw_text": "MRP Rs. 99.00 (Incl. of all taxes)",
+      "normalized_value": {"amount": 99.0, "currency": "INR"},
+      "bbox": [50, 350, 500, 380],
+      "is_present": true,
+      "presence_flag": "PRESENT",
+      "rule_compliance_gt": "COMPLIANT"
+    },
+    "consumer_care_details": {
+      "raw_text": "Customer Care: 1800-123-4567 Email: care@samplebrand.com",
+      "normalized_value": {"phone": "1800-123-4567", "email": "care@samplebrand.com"},
+      "bbox": [50, 390, 700, 420],
+      "is_present": true,
+      "presence_flag": "PRESENT",
+      "rule_compliance_gt": "COMPLIANT"
+    },
+    "unit_sale_price": {
+      "raw_text": "Unit Sale Price: Rs 0.495 / g",
+      "normalized_value": {"amount": 0.495, "unit": "g"},
+      "bbox": [50, 430, 400, 460],
+      "is_present": true,
+      "presence_flag": "PRESENT",
+      "rule_compliance_gt": "COMPLIANT"
+    }
+  },
+  "annotator_id": "ANN_LEGAL_OFFICER_01",
+  "annotation_version": "1.0.0",
+  "timestamp": "2026-09-09 00:00:00"
+}

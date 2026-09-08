@@ -1,26 +1,138 @@
-# Environment files
+# ==========================================
+# Environment Variables & Secrets
+# ==========================================
 .env
-*/.env
+.env.*
+*.env
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
 
-# Node
-node_modules/
-*/node_modules/
-npm-debug.log*
-dist/
-build/
-
-# Python
-__pycache__/
-*.pyc
+# ==========================================
+# Python Virtual Environments
+# ==========================================
 venv/
 .venv/
-*.egg-info/
+env/
+.env/
+sih/
+**/venv/
+**/.venv/
+**/env/
+**/sih/
+ENV/
+env.bak/
+venv.bak/
 
-# Uploaded images (local dev storage)
+# ==========================================
+# Python Caches & Build Artifacts
+# ==========================================
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.egg
+*.egg-info/
+**/*.egg-info/
+.pytest_cache/
+**/.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# ==========================================
+# Datasets, Annotations & Image Repositories
+# ==========================================
+# AI Service dataset folders
+ai-service/archive (1)/
+ai-service/archive*/
+ai-service/Indian-Scene-Text-Dataset-master/
+ai-service/Label-extraction-using-ocr-and-vit-main/
+ai-service/raw_data/
+ai-service/processed_data/
+ai-service/test/
+ai-service/train/
+ai-service/scratch/
+
+# General dataset patterns
+**/raw_data/
+**/processed_data/
+**/datasets/
+**/dataset/
+**/scratch/
+archive (1)/
+archive*/
+**/*-master/
+**/*-main/
+
+# Large compressed archives
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+
+# Data serialization files
+*.parquet
+*.h5
+*.hdf5
+
+# ==========================================
+# ML Model Weights & Checkpoints (>50MB/100MB)
+# ==========================================
+*.pt
+*.pth
+*.bin
+*.onnx
+*.safetensors
+*.ckpt
+*.weights
+
+# ==========================================
+# Generated Inspection Reports & PDFs
+# ==========================================
+ai-service/reports/pdf_exports/*
+!ai-service/reports/pdf_exports/.gitkeep
+**/pdf_exports/*
+!**/pdf_exports/.gitkeep
+
+# ==========================================
+# Node / Frontend Build & Caches
+# ==========================================
+node_modules/
+**/node_modules/
+dist/
+dist-ssr/
+build/
+.next/
+out/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.tsbuildinfo
+
+# ==========================================
+# Uploads & Local Storage
+# ==========================================
 backend/uploads/*
 !backend/uploads/.gitkeep
+tmp/
+temp/
 
-# OS/editor junk
+# ==========================================
+# Operating System & IDE Artifacts
+# ==========================================
 .DS_Store
+Thumbs.db
+desktop.ini
 .vscode/
+**/.vscode/
 .idea/
+**/.idea/
+*.swp
+*.swo
+

@@ -1,0 +1,32 @@
+{
+  "benchmark_metadata": {
+    "timestamp": "2026-09-08 00:46:30",
+    "samples_tested": 49,
+    "system_os": "win32",
+    "python_version": "3.13.2"
+  },
+  "phase6_standalone": {
+    "samples": 49,
+    "average_latency_ms": 0.1,
+    "median_latency_ms": 0.06,
+    "p95_latency_ms": 0.38,
+    "throughput_items_per_sec": 9955.91,
+    "memory_delta_mb": 0.02
+  },
+  "phase4_5_6_combined": {
+    "samples": 49,
+    "average_latency_ms": 9.73,
+    "median_latency_ms": 1.56,
+    "p95_latency_ms": 62.01,
+    "throughput_items_per_sec": 102.79,
+    "memory_delta_mb": 0.04
+  },
+  "full_pipeline_phase2_3_4_5_6": {
+    "samples": 49,
+    "average_latency_ms": 630.34,
+    "median_latency_ms": 608.19,
+    "p95_latency_ms": 1144.54,
+    "throughput_items_per_sec": 1.59,
+    "memory_delta_mb": 3.61
+  }
+}

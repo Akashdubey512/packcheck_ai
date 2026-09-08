@@ -1,0 +1,10 @@
+{
+  "preprocessing": 43.03,
+  "ocr_text_detection": 2998.86,
+  "field_extraction": 8.28,
+  "confidence_and_evidence": 21.38,
+  "legal_rule_compliance": 4.19,
+  "single_view_total": 3075.74,
+  "multi_view_total": 2024.83,
+  "pdf_export": 8.33
+}

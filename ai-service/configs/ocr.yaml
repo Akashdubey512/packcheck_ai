@@ -1,0 +1,28 @@
+# OCR Subsystem Configuration
+# Project: Legal Metrology (Packaged Commodities) Compliance Auditor - SIH 2026
+
+ocr:
+  default_backend: "rapidocr"          # Options: "rapidocr", "easyocr", "pytesseract"
+  fallback_backends: ["easyocr", "pytesseract"]
+  languages: ["en", "hi"]              # Target languages: English, Hindi / Devanagari
+
+detection:
+  box_threshold: 0.5                  # DBNet detection confidence threshold
+  unclip_ratio: 1.6                   # DBNet unclip ratio for text region expansion
+  max_side_len: 1280                  # Max image side length for text detection network
+
+recognition:
+  min_confidence: 0.20                # Minimum recognition score to retain text region
+  score_threshold: 0.50               # Confidence threshold for high-quality regions
+
+execution:
+  use_gpu: false                      # Default to CPU execution for portable deployment
+  batch_size: 1                       # Batch processing size
+  max_text_regions: 300               # Performance safeguard: max text regions per image
+  timeout_seconds: 30.0               # Maximum allowed time per image
+  coordinate_system: "IMAGE_PIXEL"    # Output bbox convention [x1, y1, x2, y2]
+
+merging:
+  enable_region_merging: true
+  horizontal_max_gap_px: 20           # Max horizontal pixel gap to merge words on same line
+  vertical_overlap_ratio: 0.50        # Vertical alignment threshold for line grouping

@@ -1,0 +1,36 @@
+{
+  "evaluation_metadata": {
+    "evaluated_at": "2026-09-08 00:45:02",
+    "dataset_split": "processed_data/val/images",
+    "images_evaluated": 49,
+    "average_latency_ms": 978.67,
+    "rule_registry_version": "2022.1"
+  },
+  "legal_ground_truth_status": {
+    "legal_accuracy": "NOT_AVAILABLE",
+    "reason": "Ground-truth legal compliance labels do not exist in dataset v1.0.0. No precision/recall fabricated."
+  },
+  "overall_status_distribution": {
+    "COMPLIANT": 0,
+    "NON_COMPLIANT": 49,
+    "REVIEW_REQUIRED": 0,
+    "INSUFFICIENT_EVIDENCE": 0,
+    "review_required_rate_percent": 0.0
+  },
+  "field_level_outcomes": {
+    "FAIL": 436,
+    "PASS": 4,
+    "MULTIPLE_CANDIDATES": 1
+  },
+  "evidence_metrics": {
+    "total_passed_fields": 4,
+    "passed_fields_with_visual_crop": 2,
+    "evidence_crop_coverage_percent": 50.0,
+    "evidence_semantic_correctness": "NOT_AVAILABLE"
+  },
+  "system_quality_signals": {
+    "deterministic_decision_consistency_percent": 100.0,
+    "contradiction_rate_percent": 8.16,
+    "unsupported_rule_rate_percent": 0.0
+  }
+}

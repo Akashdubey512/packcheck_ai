@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LegalMetrologyPackagingGroundTruthAnnotation",
+  "type": "object",
+  "required": [
+    "product_id",
+    "inspection_id",
+    "view_id",
+    "image_id",
+    "declarations",
+    "annotator_id",
+    "annotation_version",
+    "timestamp"
+  ],
+  "properties": {
+    "product_id": {
+      "type": "string",
+      "description": "Unique product identification number/string"
+    },
+    "inspection_id": {
+      "type": "string",
+      "description": "Inspection session identifier"
+    },
+    "view_id": {
+      "type": "string",
+      "enum": ["FRONT", "BACK", "SIDE_LEFT", "SIDE_RIGHT", "TOP", "BOTTOM", "UNKNOWN"],
+      "description": "Packaging face orientation"
+    },
+    "image_id": {
+      "type": "string",
+      "description": "Source image filename/ID"
+    },
+    "declarations": {
+      "type": "object",
+      "required": [
+        "manufacturer_name_and_address",
+        "country_of_origin",
+        "common_generic_name",
+        "net_quantity",
+        "manufacturing_packing_date",
+        "best_before_expiry",
+        "mrp",
+        "consumer_care_details",
+        "unit_sale_price"
+      ],
+      "additionalProperties": {
+        "type": "object",
+        "required": ["raw_text", "normalized_value", "bbox", "is_present"],
+        "properties": {
+          "raw_text": {"type": ["string", "null"]},
+          "normalized_value": {"type": ["object", "string", "number", "null"]},
+          "bbox": {
+            "type": ["array", "null"],
+            "items": {"type": "integer"},
+            "minItems": 4,
+            "maxItems": 4
+          },
+          "is_present": {"type": "boolean"},
+          "rule_compliance_gt": {
+            "type": ["string", "null"],
+            "enum": ["COMPLIANT", "NON_COMPLIANT", "NOT_APPLICABLE", null]
+          }
+        }
+      }
+    },
+    "annotator_id": {"type": "string"},
+    "annotation_version": {"type": "string", "default": "1.0.0"},
+    "timestamp": {"type": "string"}
+  }
+}

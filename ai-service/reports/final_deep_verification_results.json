@@ -1,0 +1,228 @@
+{
+  "functional_trace": {
+    "1_security_validation": "PASS",
+    "2_decode_and_quality": "PASS",
+    "3_preprocessing_variants": "PASS",
+    "4_ocr_detection_recognition": "PASS",
+    "5_field_extraction_normalization": "PASS",
+    "6_confidence_and_evidence_crop": "PASS",
+    "7_sha256_provenance": "PASS",
+    "8_legal_rule_engine": "PASS",
+    "9_multiview_inspection": "PASS",
+    "10_pdf_generation": "PASS",
+    "11_api_response": "PASS",
+    "12_ui_dashboard": "PASS"
+  },
+  "ocr_verification": {
+    "singleton_reused": true,
+    "warmup_verified": true,
+    "warm_runs_ms": [
+      2577.03,
+      1813.64,
+      2070.51,
+      2112.53,
+      2041.75,
+      2011.26,
+      1892.56,
+      1910.35,
+      1802.68,
+      1796.15
+    ],
+    "warm_p50": 1960.8,
+    "warm_p95": 2368.01,
+    "warm_p99": 2535.23,
+    "warm_avg": 2002.85
+  },
+  "accuracy_safety": {
+    "original_dims": [
+      2880,
+      3840
+    ],
+    "result_dims": [
+      2880,
+      3840
+    ],
+    "dims_preserved": true,
+    "bboxes_within_original_bounds": true,
+    "accuracy_regression_status": "ACCURACY REGRESSION: NOT PROVABLE WITHOUT REAL MANUALLY ANNOTATED GT"
+  },
+  "real_legal_fields": {
+    "manufacturer_name_address": {
+      "status": "NOT_FOUND / REVIEW_REQUIRED",
+      "inferred": false
+    },
+    "country_of_origin": {
+      "status": "NOT_FOUND / REVIEW_REQUIRED",
+      "inferred": false
+    },
+    "generic_name": {
+      "status": "NOT_FOUND / REVIEW_REQUIRED",
+      "inferred": false
+    },
+    "net_quantity": {
+      "raw_text": "100g 32.1 16.1",
+      "raw_value": "100",
+      "status": "CONFIDENT",
+      "has_bbox": true,
+      "evidence_crops": [
+        "crop_DC product_desc_english (1)_net_quantity_1"
+      ]
+    },
+    "manufacture_or_packing_date": {
+      "status": "NOT_FOUND / REVIEW_REQUIRED",
+      "inferred": false
+    },
+    "expiry_or_use_by_date": {
+      "status": "NOT_FOUND / REVIEW_REQUIRED",
+      "inferred": false
+    },
+    "mrp_inclusive_of_taxes": {
+      "status": "NOT_FOUND / REVIEW_REQUIRED",
+      "inferred": false
+    },
+    "consumer_care_contact": {
+      "status": "NOT_FOUND / REVIEW_REQUIRED",
+      "inferred": false
+    },
+    "unit_sale_price": {
+      "status": "NOT_FOUND / REVIEW_REQUIRED",
+      "inferred": false
+    }
+  },
+  "multiview_verification": {
+    "contradiction_detected": true,
+    "contradiction_marked_review_required": true,
+    "coverage_statuses": [
+      "FULL_COVERAGE",
+      "PARTIAL_COVERAGE",
+      "INSUFFICIENT_COVERAGE",
+      "UNKNOWN_COVERAGE"
+    ]
+  },
+  "legal_rule_evaluations": {
+    "RULE_6_1_A": {
+      "field_name": "manufacturer_name_address",
+      "status": "FAIL",
+      "reason_code": "MANUFACTURER_NAME_ADDRESS_DECLARATION_MISSING",
+      "explanation": "Mandatory declaration for 'manufacturer_name_address' is demonstrably absent from packaging."
+    },
+    "RULE_6_1_B": {
+      "field_name": "country_of_origin",
+      "status": "FAIL",
+      "reason_code": "COUNTRY_OF_ORIGIN_MISSING",
+      "explanation": "Country of Origin declaration is demonstrably absent from packaging."
+    },
+    "RULE_6_1_C": {
+      "field_name": "generic_name",
+      "status": "FAIL",
+      "reason_code": "GENERIC_NAME_DECLARATION_MISSING",
+      "explanation": "Mandatory declaration for 'generic_name' is demonstrably absent from packaging."
+    },
+    "RULE_6_1_D": {
+      "field_name": "net_quantity",
+      "status": "PASS",
+      "reason_code": "NET_QUANTITY_VALID",
+      "explanation": "Valid Net Quantity declaration detected: 100.0 g (Canonical: 100.0 g)."
+    },
+    "RULE_6_1_E": {
+      "field_name": "manufacture_or_packing_date",
+      "status": "FAIL",
+      "reason_code": "MANUFACTURE_OR_PACKING_DATE_DECLARATION_MISSING",
+      "explanation": "Mandatory date declaration for 'manufacture_or_packing_date' is demonstrably absent from packaging."
+    },
+    "RULE_6_1_F": {
+      "field_name": "expiry_or_use_by_date",
+      "status": "FAIL",
+      "reason_code": "EXPIRY_OR_USE_BY_DATE_DECLARATION_MISSING",
+      "explanation": "Mandatory date declaration for 'expiry_or_use_by_date' is demonstrably absent from packaging."
+    },
+    "RULE_6_1_G": {
+      "field_name": "mrp_inclusive_of_taxes",
+      "status": "FAIL",
+      "reason_code": "MRP_DECLARATION_MISSING",
+      "explanation": "Mandatory Maximum Retail Price (MRP) declaration is demonstrably absent from packaging."
+    },
+    "RULE_6_1_H": {
+      "field_name": "consumer_care_contact",
+      "status": "FAIL",
+      "reason_code": "CONSUMER_CARE_CONTACT_DECLARATION_MISSING",
+      "explanation": "Mandatory declaration for 'consumer_care_contact' is demonstrably absent from packaging."
+    },
+    "RULE_6_11": {
+      "field_name": "unit_sale_price",
+      "status": "FAIL",
+      "reason_code": "UNIT_SALE_PRICE_DECLARATION_MISSING",
+      "explanation": "Mandatory declaration for 'unit_sale_price' is demonstrably absent from packaging."
+    }
+  },
+  "security_tests": {
+    "invalid_magic_bytes_rejected": true,
+    "extension_spoofing_rejected": true,
+    "path_traversal_sanitized": true
+  },
+  "performance_profile": {
+    "prep": {
+      "p50": 1004.46,
+      "p95": 1067.22,
+      "p99": 1071.39,
+      "avg": 1010.36
+    },
+    "ocr": {
+      "p50": 1726.59,
+      "p95": 1761.73,
+      "p99": 1767.72,
+      "avg": 1599.24
+    },
+    "ext": {
+      "p50": 0.85,
+      "p95": 1.67,
+      "p99": 1.8,
+      "avg": 1.06
+    },
+    "conf": {
+      "p50": 185.51,
+      "p95": 321.45,
+      "p99": 341.72,
+      "avg": 201.69
+    },
+    "comp": {
+      "p50": 0.23,
+      "p95": 0.33,
+      "p99": 0.33,
+      "avg": 0.25
+    },
+    "e2e": {
+      "p50": 2808.93,
+      "p95": 2971.38,
+      "p99": 2996.91,
+      "avg": 2812.61
+    }
+  },
+  "concurrency_tests": {
+    "1_concurrent": {
+      "total_elapsed_ms": 2572.53,
+      "avg_ms_per_req": 2572.53,
+      "unique_session_ids": true,
+      "all_succeeded": true
+    },
+    "2_concurrent": {
+      "total_elapsed_ms": 4488.79,
+      "avg_ms_per_req": 2244.39,
+      "unique_session_ids": true,
+      "all_succeeded": true
+    },
+    "4_concurrent": {
+      "total_elapsed_ms": 6473.68,
+      "avg_ms_per_req": 1618.42,
+      "unique_session_ids": true,
+      "all_succeeded": true
+    }
+  },
+  "memory_leak_test": {
+    "initial_ram_mb": 601.58,
+    "peak_ram_mb": 603.2,
+    "final_ram_mb": 602.47,
+    "delta_ram_mb": 0.89,
+    "leak_detected": false
+  }
+}

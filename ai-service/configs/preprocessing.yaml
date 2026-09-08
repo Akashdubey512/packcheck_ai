@@ -1,0 +1,40 @@
+# Image Quality Assessment & Preprocessing Configuration
+# Project: Legal Metrology (Packaged Commodities) Compliance Auditor
+# Phase 2 Pipeline Configuration
+
+validation:
+  min_width: 32
+  min_height: 32
+  max_width: 8000
+  max_height: 8000
+  max_pixel_count: 50000000 # 50 Megapixels
+  allowed_formats: ["JPEG", "PNG", "BMP", "WEBP", "TIFF"]
+
+quality_thresholds:
+  # Metric thresholds (documented heuristic values for packaging OCR)
+  blur_threshold: 100.0        # Laplacian variance: <100 indicates blurry image
+  brightness_min: 40.0         # Mean pixel brightness (0-255): <40 indicates dark image
+  brightness_max: 220.0        # Mean pixel brightness (0-255): >220 indicates overexposed image
+  contrast_threshold: 25.0     # RMS contrast / Std Dev: <25 indicates low contrast
+  noise_threshold: 15.0        # Estimate noise std dev: >15 indicates noisy image
+  sharpness_threshold: 10.0    # Gradient magnitude mean: <10 indicates soft image
+
+preprocessing:
+  resize_max_dimension: 2048   # Scale images so max(W, H) <= 2048 while preserving aspect ratio
+  clahe_clip_limit: 2.0
+  clahe_tile_grid_size: [8, 8]
+  contrast_alpha: 1.2          # Linear contrast scaling factor
+  brightness_beta: 10.0        # Linear brightness offset
+  denoise_h: 10                # OpenCV fastNlMeansDenoising parameter
+  sharpen_kernel_strength: 0.5 # Sharpening filter strength
+
+deskew:
+  min_angle: 0.5               # Minimum angle in degrees to apply rotation (avoid unnecessary interpolation)
+  max_angle: 15.0              # Maximum skew angle expected for text lines
+
+orientation:
+  auto_rotate: true
+  use_exif: true
+
+perspective:
+  auto_correct: false          # Modular interface; set true when reliable boundary detector is plugged in

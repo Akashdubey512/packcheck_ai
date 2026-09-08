@@ -1,0 +1,24 @@
+# Legal Metrology Compliance Rule Engine Configuration
+
+pipeline:
+  version: "1.0.0"
+  rule_registry_version: "2022.1"
+  rule_source_file: "raw_data/legal_metrology/legal_metrology_rules.json"
+
+decision_rules:
+  unambiguous_fail_action: "NON_COMPLIANT"
+  extraction_uncertainty_action: "REVIEW_REQUIRED"
+  contradiction_action: "REVIEW_REQUIRED"
+  missing_evidence_crop_action: "REVIEW_REQUIRED"
+  unknown_applicability_action: "REVIEW_REQUIRED"
+
+severity_levels:
+  rule_6_1_a: "CRITICAL"  # Manufacturer Name & Address
+  rule_6_1_b: "HIGH"      # Country of Origin
+  rule_6_1_c: "HIGH"      # Common Generic Name
+  rule_6_1_d: "CRITICAL"  # Net Quantity
+  rule_6_1_e: "HIGH"      # Mfg / Packing Date
+  rule_6_1_f: "HIGH"      # Expiry / Use-by Date
+  rule_6_1_g: "CRITICAL"  # MRP
+  rule_6_1_h: "HIGH"      # Consumer Care
+  rule_6_11:  "HIGH"      # Unit Sale Price

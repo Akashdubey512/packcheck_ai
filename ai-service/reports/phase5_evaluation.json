@@ -1,0 +1,23 @@
+{
+  "phase": 5,
+  "title": "Phase 5 Confidence Calibration Evaluation Report",
+  "calibration_status": "NOT_AVAILABLE",
+  "audit_details": {
+    "datasets_inspected": [
+      "Product Description English/Hindi OCR",
+      "SROIE",
+      "CORD-v2",
+      "Open Food Facts India",
+      "Label Extraction Dataset"
+    ],
+    "calibration_gt_available": false,
+    "status": "NOT_AVAILABLE",
+    "reason": "Dataset Audit Finding: Confidence calibration evaluation requires field-level ground truth annotations across the 9 mandatory Legal Metrology fields to calculate Expected Calibration Error (ECE) and Brier score. The existing datasets lack region-level field ground truth. Per Phase 5 rules: Calibration metric reporting is NOT_AVAILABLE. Fabrication of calibration curves, reliability diagrams, or fake ECE values is strictly prohibited."
+  },
+  "metrics": {
+    "expected_calibration_error_ece": "NOT_AVAILABLE",
+    "maximum_calibration_error_mce": "NOT_AVAILABLE",
+    "brier_score": "NOT_AVAILABLE",
+    "reliability_diagram": "NOT_AVAILABLE"
+  }
+}

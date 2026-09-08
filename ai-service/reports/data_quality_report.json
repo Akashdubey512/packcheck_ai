@@ -1,0 +1,209 @@
+{
+  "audit_version": "1.0.0",
+  "timestamp": "2026-09-08 23:43:27",
+  "total_datasets_audited": 7,
+  "datasets": {
+    "Legal Metrology Rules": {
+      "dataset_name": "Legal Metrology Rules",
+      "dataset_path": "D:\\sih_2026\\raw_data\\legal_metrology",
+      "file_count": 1,
+      "format_distribution": {
+        ".json": 1
+      },
+      "total_images": 0,
+      "valid_images": 0,
+      "corrupted_images": 0,
+      "exact_duplicate_images": 0,
+      "near_duplicate_images": 0,
+      "annotation_files": 1,
+      "image_statistics": {}
+    },
+    "Open Food Facts (India)": {
+      "dataset_name": "Open Food Facts (India)",
+      "dataset_path": "D:\\sih_2026\\raw_data\\open_food_facts_india",
+      "file_count": 121,
+      "format_distribution": {
+        ".json": 1,
+        ".jpg": 120
+      },
+      "total_images": 120,
+      "valid_images": 120,
+      "corrupted_images": 0,
+      "exact_duplicate_images": 0,
+      "near_duplicate_images": 0,
+      "annotation_files": 1,
+      "image_statistics": {
+        "width_min": 114,
+        "width_max": 400,
+        "width_mean": 290.07,
+        "width_std": 81.64,
+        "height_min": 104,
+        "height_max": 400,
+        "height_mean": 370.25,
+        "height_std": 68.56,
+        "channels_min": 3,
+        "channels_max": 3,
+        "aspect_ratio_min": 0.285,
+        "aspect_ratio_max": 3.8462,
+        "aspect_ratio_mean": 0.88
+      }
+    },
+    "SROIE Receipt Dataset": {
+      "dataset_name": "SROIE Receipt Dataset",
+      "dataset_path": "D:\\sih_2026\\raw_data\\sroie",
+      "file_count": 1086,
+      "format_distribution": {
+        ".txt": 3,
+        ".jpeg": 1083
+      },
+      "total_images": 1083,
+      "valid_images": 1083,
+      "corrupted_images": 0,
+      "exact_duplicate_images": 0,
+      "near_duplicate_images": 0,
+      "annotation_files": 3,
+      "image_statistics": {
+        "width_min": 9,
+        "width_max": 1540,
+        "width_mean": 93.03,
+        "width_std": 88.84,
+        "height_min": 6,
+        "height_max": 728,
+        "height_mean": 59.9,
+        "height_std": 45.09,
+        "channels_min": 3,
+        "channels_max": 3,
+        "aspect_ratio_min": 0.3519,
+        "aspect_ratio_max": 4.8235,
+        "aspect_ratio_mean": 1.56
+      }
+    },
+    "Product Description OCR": {
+      "dataset_name": "Product Description OCR",
+      "dataset_path": "D:\\sih_2026\\raw_data\\product_desc_ocr",
+      "file_count": 760,
+      "format_distribution": {
+        ".jpg": 380,
+        ".xml": 380
+      },
+      "total_images": 380,
+      "valid_images": 380,
+      "corrupted_images": 0,
+      "exact_duplicate_images": 1,
+      "near_duplicate_images": 2,
+      "annotation_files": 380,
+      "image_statistics": {
+        "width_min": 1440,
+        "width_max": 5120,
+        "width_mean": 3132.33,
+        "width_std": 754.02,
+        "height_min": 1080,
+        "height_max": 5120,
+        "height_mean": 3463.76,
+        "height_std": 600.86,
+        "channels_min": 3,
+        "channels_max": 3,
+        "aspect_ratio_min": 0.452,
+        "aspect_ratio_max": 2.1132,
+        "aspect_ratio_mean": 0.93
+      }
+    },
+    "Indian Scene Text": {
+      "dataset_name": "Indian Scene Text",
+      "dataset_path": "D:\\sih_2026\\raw_data\\indian_scene_text",
+      "file_count": 36,
+      "format_distribution": {
+        ".ipynb": 6,
+        "": 1,
+        ".md": 1,
+        ".csv": 10,
+        ".jpg": 10,
+        ".png": 7,
+        ".pth": 1
+      },
+      "total_images": 17,
+      "valid_images": 17,
+      "corrupted_images": 0,
+      "exact_duplicate_images": 0,
+      "near_duplicate_images": 0,
+      "annotation_files": 10,
+      "image_statistics": {
+        "width_min": 193,
+        "width_max": 750,
+        "width_mean": 309.29,
+        "width_std": 185.94,
+        "height_min": 50,
+        "height_max": 455,
+        "height_mean": 188.47,
+        "height_std": 153.31,
+        "channels_min": 3,
+        "channels_max": 4,
+        "aspect_ratio_min": 0.8684,
+        "aspect_ratio_max": 4.0,
+        "aspect_ratio_mean": 2.37
+      }
+    },
+    "CORD-v2 Layout Dataset": {
+      "dataset_name": "CORD-v2 Layout Dataset",
+      "dataset_path": "D:\\sih_2026\\raw_data\\cord_v2",
+      "file_count": 202,
+      "format_distribution": {
+        ".json": 2,
+        ".png": 200
+      },
+      "total_images": 200,
+      "valid_images": 200,
+      "corrupted_images": 0,
+      "exact_duplicate_images": 0,
+      "near_duplicate_images": 3,
+      "annotation_files": 2,
+      "image_statistics": {
+        "width_min": 228,
+        "width_max": 3024,
+        "width_mean": 1007.46,
+        "width_std": 554.14,
+        "height_min": 336,
+        "height_max": 4224,
+        "height_mean": 1583.8,
+        "height_std": 1005.27,
+        "channels_min": 3,
+        "channels_max": 3,
+        "aspect_ratio_min": 0.4727,
+        "aspect_ratio_max": 1.0,
+        "aspect_ratio_mean": 0.66
+      }
+    },
+    "Label Extraction ViT": {
+      "dataset_name": "Label Extraction ViT",
+      "dataset_path": "D:\\sih_2026\\raw_data\\label_extraction_vit",
+      "file_count": 12,
+      "format_distribution": {
+        ".zip": 1,
+        ".ipynb": 1,
+        ".md": 1,
+        ".png": 9
+      },
+      "total_images": 9,
+      "valid_images": 9,
+      "corrupted_images": 0,
+      "exact_duplicate_images": 0,
+      "near_duplicate_images": 0,
+      "annotation_files": 0,
+      "image_statistics": {
+        "width_min": 387,
+        "width_max": 1247,
+        "width_mean": 887.11,
+        "width_std": 286.07,
+        "height_min": 364,
+        "height_max": 757,
+        "height_mean": 611.44,
+        "height_std": 136.94,
+        "channels_min": 4,
+        "channels_max": 4,
+        "aspect_ratio_min": 0.9699,
+        "aspect_ratio_max": 2.2527,
+        "aspect_ratio_mean": 1.47
+      }
+    }
+  }
+}
