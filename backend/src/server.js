@@ -25,16 +25,21 @@ const PORT = process.env.PORT || 5000;
 const uploadDir = process.env.UPLOAD_DIR || "./uploads";
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
-// Environment-aware CORS configuration
-const allowedOrigins = process.env.FRONTEND_ORIGIN
-  ? [process.env.FRONTEND_ORIGIN]
-  : ["http://localhost:3000", "http://localhost:5173", "http://127.0.0.1:3000", "http://127.0.0.1:5173"];
+// Environment-aware CORS configuration supporting Vercel and production origins
+const rawOrigins = process.env.FRONTEND_ORIGIN || "http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000,http://127.0.0.1:5173";
+const allowedOrigins = rawOrigins.split(",").map((o) => o.trim());
 
 app.use(
   cors({
     origin: (origin, callback) => {
       // Allow requests with no origin (mobile apps, curl, postman, same-origin)
-      if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== "production") {
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        allowedOrigins.includes("*") ||
+        (origin.startsWith("http") && /\.vercel\.app$/.test(new URL(origin).hostname)) ||
+        process.env.NODE_ENV !== "production"
+      ) {
         callback(null, true);
       } else {
         callback(new Error(`CORS policy rejection for origin: ${origin}`));

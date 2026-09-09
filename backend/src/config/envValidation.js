@@ -6,9 +6,9 @@ export function validateStartupEnv() {
   const isProduction = process.env.NODE_ENV === "production";
   const requiredVars = {
     JWT_SECRET: process.env.JWT_SECRET,
-    MONGO_URI: process.env.MONGO_URI || process.env.MONGODB_URI,
-    AI_SERVICE_URL: process.env.AI_SERVICE_URL,
-    FRONTEND_ORIGIN: process.env.FRONTEND_ORIGIN,
+    MONGO_URI: process.env.MONGO_URI || process.env.MONGODB_URI || process.env.DATABASE_URL,
+    AI_SERVICE_URL: process.env.AI_SERVICE_URL || "http://127.0.0.1:8000",
+    FRONTEND_ORIGIN: process.env.FRONTEND_ORIGIN || "*",
   };
 
   const INSECURE_DEFAULTS = [
