@@ -276,7 +276,7 @@ export const ScanUploader: React.FC<ScanUploaderProps> = ({ onFileSelected, isUp
         onClose={() => setIsCameraOpen(false)}
         onCapture={(file) => {
           setIsCameraOpen(false);
-          validateAndProcessFile(file);
+          validateAndProcessFiles([file]);
         }}
         onBrowseFiles={() => fileInputRef.current?.click()}
       />

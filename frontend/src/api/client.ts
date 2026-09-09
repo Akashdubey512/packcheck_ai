@@ -33,7 +33,14 @@ class ApiClient {
 
   private buildUrl(endpoint: string, params?: Record<string, string | number | boolean | undefined>): string {
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-    const url = new URL(`${this.baseUrl}${cleanEndpoint}`);
+    let url: URL;
+    if (this.baseUrl.startsWith('http://') || this.baseUrl.startsWith('https://')) {
+      url = new URL(`${this.baseUrl}${cleanEndpoint}`);
+    } else if (typeof window !== 'undefined' && window.location?.origin) {
+      url = new URL(`${this.baseUrl}${cleanEndpoint}`, window.location.origin);
+    } else {
+      url = new URL(`${this.baseUrl}${cleanEndpoint}`, 'http://localhost:5000');
+    }
 
     if (params) {
       Object.entries(params).forEach(([key, value]) => {

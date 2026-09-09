@@ -14,7 +14,7 @@ import { ComplianceCheck } from '@/types/compliance';
 import { DecisionTrace } from '@/types/evidence';
 import { ROUTES } from '@/constants/routes';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, RotateCcw, FileText, Target, ShieldCheck, GitCommit, CheckCircle, ExternalLink, Lock, Layers } from 'lucide-react';
+import { ArrowLeft, FileText, Target, ShieldCheck, GitCommit, CheckCircle, ExternalLink, Lock, Layers } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { butterSpring, pageFadeSlide, gpuAcceleratedStyle } from '@/animations/motion';
 

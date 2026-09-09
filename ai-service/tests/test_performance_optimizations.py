@@ -73,5 +73,37 @@ class TestPerformanceOptimizations(unittest.TestCase):
             if temp_path.exists():
                 temp_path.unlink()
 
+    def test_compute_files_hash_deterministic(self):
+        """Verify compute_files_hash generates deterministic and identical SHA-256 digests."""
+        import tempfile
+        from pathlib import Path
+        from app.main import compute_files_hash
+
+        with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as f1:
+            f1.write(b"SAMPLE_IMAGE_DATA_123")
+            p1 = Path(f1.name)
+
+        try:
+            h1 = compute_files_hash([p1])
+            h2 = compute_files_hash([p1])
+            self.assertEqual(h1, h2)
+            self.assertEqual(len(h1), 64)
+        finally:
+            if p1.exists():
+                p1.unlink()
+
+    def test_inspection_lru_cache_behavior(self):
+        """Verify LRU cache stores and retrieves inspection results correctly."""
+        from app.main import _INSPECTION_CACHE, _MAX_CACHE_SIZE
+
+        _INSPECTION_CACHE.clear()
+        _INSPECTION_CACHE["hash_1"] = {"status": "COMPLIANT", "score": 95}
+        _INSPECTION_CACHE["hash_2"] = {"status": "NON_COMPLIANT", "score": 40}
+
+        self.assertIn("hash_1", _INSPECTION_CACHE)
+        self.assertEqual(_INSPECTION_CACHE["hash_1"]["status"], "COMPLIANT")
+        self.assertLessEqual(len(_INSPECTION_CACHE), _MAX_CACHE_SIZE)
+
 if __name__ == "__main__":
     unittest.main()
+

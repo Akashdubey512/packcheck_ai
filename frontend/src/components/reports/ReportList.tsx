@@ -69,7 +69,7 @@ export const ReportList: React.FC<ReportListProps> = ({ reports, onSelectReport,
       </div>
       <div class="sec"><div class="sec-title">Executive Summary</div><p>${report.summary}</p></div>
       ${report.violations.length>0?`<div class="sec"><div class="sec-title" style="color:#dc2626">Infractions (${report.violations.length})</div>
-        ${report.violations.map((v,i)=>`<div class="vbox"><strong>${v.title||v.ruleName||'Infraction '+(i+1)}</strong>
+        ${report.violations.map((v: any,i: number)=>`<div class="vbox"><strong>${v.title||v.ruleName||'Infraction '+(i+1)}</strong>
           <p style="font-size:11px">${v.description||v.message||''}</p>
           <div class="mono" style="font-size:10px">Clause: ${v.legalClause||'N/A'}</div></div>`).join('')}
       </div>`:''}

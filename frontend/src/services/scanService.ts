@@ -31,7 +31,7 @@ export const ScanService = {
         }
       }
 
-      if (!fileUrl && fileList.length > 0) {
+      if (!fileUrl && fileList.length > 0 && fileList[0]) {
         fileUrl = URL.createObjectURL(fileList[0]);
       }
 

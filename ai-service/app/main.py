@@ -1,30 +1,23 @@
-"""
-FastAPI Production Server & Legal Metrology Auditor API
-Exposes production REST endpoints and serves the Web Auditor Dashboard interface.
-"""
-
 import os
 import shutil
 import tempfile
+import asyncio
+import copy
+import hashlib
+from collections import OrderedDict
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import List, Optional
 from pydantic import BaseModel
-from fastapi import FastAPI, File, UploadFile, HTTPException, Depends
-
+from fastapi import FastAPI, File, UploadFile, HTTPException, Depends, BackgroundTasks, Header
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
+import uuid
+import json
 
 from ml.security.upload_validator import validate_upload_file, SecurityValidationError
 from ml.inspection.inspection_pipeline import MultiViewInspectionPipeline
 from app.services.audit_trail import AuditTrailService
-
-app = FastAPI(
-    title="Legal Metrology Compliance Auditor API",
-    description="Automated legal metrology compliance inspection system under Packaged Commodities Rules, 2011.",
-    version="1.0.0"
-)
-
-import json
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SESSIONS_DIR = BASE_DIR / "processed_data" / "sessions"
@@ -33,6 +26,50 @@ SESSIONS_DIR.mkdir(parents=True, exist_ok=True)
 # Pipeline & Audit Trail singletons
 pipeline = MultiViewInspectionPipeline()
 audit_service = AuditTrailService()
+
+# In-memory LRU Response Cache for high-performance duplicate/preset inspection calls
+_MAX_CACHE_SIZE = 128
+_INSPECTION_CACHE: "OrderedDict[str, dict]" = OrderedDict()
+_LEGACY_CACHE: "OrderedDict[str, dict]" = OrderedDict()
+_CACHE_LOCK = asyncio.Lock()
+IS_READY = False
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Production lifespan handler.
+    Pre-warms OCR models and pipeline weights on startup so zero first-request latency occurs.
+    """
+    global IS_READY
+    try:
+        from PIL import Image
+        warmup_img = Image.new("RGB", (160, 160), color=(255, 255, 255))
+        # Warmup in worker thread
+        await asyncio.to_thread(pipeline.inspect_images, [warmup_img], inspection_id="STARTUP_WARMUP")
+        IS_READY = True
+    except Exception as err:
+        print(f"[!] Warning during startup warmup: {err}")
+        IS_READY = True
+    yield
+    # Shutdown hook
+    _INSPECTION_CACHE.clear()
+    _LEGACY_CACHE.clear()
+
+app = FastAPI(
+    title="Legal Metrology Compliance Auditor API",
+    description="Automated legal metrology compliance inspection system under Packaged Commodities Rules, 2011.",
+    version="1.0.0",
+    lifespan=lifespan
+)
+
+def compute_files_hash(file_paths: List[Path]) -> str:
+    """Compute deterministic SHA-256 digest of input files."""
+    hasher = hashlib.sha256()
+    for fp in sorted(file_paths, key=lambda p: p.name):
+        with open(fp, "rb") as f:
+            while chunk := f.read(65536):
+                hasher.update(chunk)
+    return hasher.hexdigest()
 
 def save_session_to_disk(inspection_id: str, payload: dict):
     file_path = SESSIONS_DIR / f"{inspection_id}.json"
@@ -65,16 +102,19 @@ async def get_dashboard():
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint."""
+    """Liveness probe endpoint."""
     return {"status": "HEALTHY", "service": "legal_metrology_auditor", "version": "1.0.0"}
 
 @app.get("/ready")
 async def readiness_check():
-    """Readiness probe endpoint."""
-    return {"status": "READY", "pipeline_initialized": True}
-
-from fastapi import FastAPI, File, UploadFile, HTTPException, Depends, BackgroundTasks, Header
-import uuid
+    """Readiness probe endpoint for orchestration and load balancers."""
+    if not IS_READY:
+        raise HTTPException(status_code=503, detail="Model pipeline warming up")
+    return {
+        "status": "READY",
+        "pipeline_initialized": True,
+        "cache_entries": len(_INSPECTION_CACHE)
+    }
 
 @app.post("/api/v1/inspect")
 async def inspect_packages(
@@ -104,8 +144,25 @@ async def inspect_packages(
         client_inspection_id = x_inspection_id
         final_inspection_id = client_inspection_id or f"INSP_{uuid.uuid4().hex[:8].upper()}"
 
-        # Run multi-view inspection pipeline with canonical inspection ID
-        result = pipeline.inspect_images(temp_paths, inspection_id=final_inspection_id)
+        # In-Memory Cache check for duplicate/sample requests
+        cache_key = compute_files_hash(temp_paths)
+        cached_result = None
+        async with _CACHE_LOCK:
+            if cache_key in _INSPECTION_CACHE:
+                cached_result = copy.deepcopy(_INSPECTION_CACHE[cache_key])
+                _INSPECTION_CACHE.move_to_end(cache_key)
+
+        if cached_result:
+            cached_result["requestId"] = request_id
+            cached_result["request_id"] = request_id
+            cached_result["inspectionId"] = final_inspection_id
+            cached_result["inspection_id"] = final_inspection_id
+            cached_result["cached"] = True
+            save_session_to_disk(final_inspection_id, cached_result)
+            return cached_result
+
+        # Run multi-view inspection pipeline asynchronously in worker thread
+        result = await asyncio.to_thread(pipeline.inspect_images, temp_paths, inspection_id=final_inspection_id)
         res_dict = result.to_dict()
 
         # Build canonical fields map for cross-service consistency
@@ -177,6 +234,13 @@ async def inspect_packages(
         res_dict["modelVersion"] = "1.2.3"
         res_dict["ruleVersion"] = "PCR-2011.v2"
         res_dict["humanReview"] = []
+        res_dict["cached"] = False
+
+        # Store in LRU cache
+        async with _CACHE_LOCK:
+            _INSPECTION_CACHE[cache_key] = copy.deepcopy(res_dict)
+            if len(_INSPECTION_CACHE) > _MAX_CACHE_SIZE:
+                _INSPECTION_CACHE.popitem(last=False)
 
         save_session_to_disk(final_inspection_id, res_dict)
         if final_inspection_id != result.inspection_id:
@@ -323,12 +387,22 @@ async def analyze_package_legacy(payload: LegacyAnalyzeRequest):
             raw_b64 = raw_b64.split(",", 1)[1]
         image_bytes = base64.b64decode(raw_b64)
 
+        cache_key = hashlib.sha256(image_bytes).hexdigest()
+        cached_legacy = None
+        async with _CACHE_LOCK:
+            if cache_key in _LEGACY_CACHE:
+                cached_legacy = copy.deepcopy(_LEGACY_CACHE[cache_key])
+                _LEGACY_CACHE.move_to_end(cache_key)
+
+        if cached_legacy:
+            return cached_legacy
+
         with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp:
             tmp.write(image_bytes)
             temp_path = Path(tmp.name)
 
         validate_upload_file(temp_path)
-        result = pipeline.inspect_images([temp_path])
+        result = await asyncio.to_thread(pipeline.inspect_images, [temp_path])
         res_dict = result.to_dict()
 
         # Map to declarations dictionary required by docs/api-contract.md
@@ -364,12 +438,19 @@ async def analyze_package_legacy(payload: LegacyAnalyzeRequest):
         raw_status = res_dict.get("overall_status", "NON_COMPLIANT")
         overall_status = "COMPLIANT" if raw_status in ("PASS", "COMPLIANT") else "NON_COMPLIANT"
 
-        return {
+        legacy_res = {
             "extracted_text": "",
             "declarations": declarations,
             "overall_status": overall_status,
             "violations": violations
         }
+
+        async with _CACHE_LOCK:
+            _LEGACY_CACHE[cache_key] = copy.deepcopy(legacy_res)
+            if len(_LEGACY_CACHE) > _MAX_CACHE_SIZE:
+                _LEGACY_CACHE.popitem(last=False)
+
+        return legacy_res
     except SecurityValidationError as se:
         raise HTTPException(status_code=400, detail=f"Security error: {str(se)}")
     except Exception as e:

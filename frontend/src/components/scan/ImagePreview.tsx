@@ -93,7 +93,7 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
 
             {/* Angle Tab Strip */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
-              {effectiveFiles.map((f, idx) => {
+              {effectiveFiles.map((_f, idx) => {
                 const angleLabel =
                   idx === 0 ? 'Angle 1: Front (PDP)' :
                   idx === 1 ? 'Angle 2: Back Panel' :
