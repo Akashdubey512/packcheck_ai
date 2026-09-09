@@ -8,7 +8,11 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./tests/setup.ts'],
+    env: {
+      VITE_DEMO_MODE: 'true',
+    },
   },
+
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

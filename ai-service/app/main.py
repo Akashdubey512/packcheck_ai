@@ -73,22 +73,27 @@ async def readiness_check():
     """Readiness probe endpoint."""
     return {"status": "READY", "pipeline_initialized": True}
 
-from fastapi import FastAPI, File, UploadFile, HTTPException, Depends, BackgroundTasks
+from fastapi import FastAPI, File, UploadFile, HTTPException, Depends, BackgroundTasks, Header
+import uuid
 
 @app.post("/api/v1/inspect")
 async def inspect_packages(
     background_tasks: BackgroundTasks,
-    files: List[UploadFile] = File(...)
+    files: List[UploadFile] = File(...),
+    x_request_id: Optional[str] = Header(None, alias="X-Request-ID"),
+    x_inspection_id: Optional[str] = Header(None, alias="X-Inspection-ID")
 ):
     """Inspect one or multiple package face images for legal compliance."""
     if not files:
         raise HTTPException(status_code=400, detail="No files uploaded.")
 
+    request_id = x_request_id or f"req_{uuid.uuid4().hex[:12]}"
     temp_paths = []
     try:
         temp_dir = Path(tempfile.mkdtemp())
         for u_file in files:
-            t_path = temp_dir / u_file.filename
+            safe_name = Path(u_file.filename).name
+            t_path = temp_dir / safe_name
             with open(t_path, "wb") as f:
                 shutil.copyfileobj(u_file.file, f)
             
@@ -96,10 +101,63 @@ async def inspect_packages(
             validate_upload_file(t_path)
             temp_paths.append(t_path)
 
-        # Run multi-view inspection pipeline
-        result = pipeline.inspect_images(temp_paths)
+        client_inspection_id = x_inspection_id
+        final_inspection_id = client_inspection_id or f"INSP_{uuid.uuid4().hex[:8].upper()}"
+
+        # Run multi-view inspection pipeline with canonical inspection ID
+        result = pipeline.inspect_images(temp_paths, inspection_id=final_inspection_id)
         res_dict = result.to_dict()
-        background_tasks.add_task(save_session_to_disk, result.inspection_id, res_dict)
+
+        # Build canonical fields map for cross-service consistency
+        canonical_fields = {}
+        field_mapping = {
+            "mrp": ["mrp", "MRP"],
+            "net_quantity": ["net_quantity", "netQuantity"],
+            "mfg_date": ["mfg_date", "manufactureDate"],
+            "packing_date": ["packing_date", "packingDate"],
+            "import_date": ["import_date", "importDate"],
+            "manufacturer_name_address": ["manufacturer_name_address", "manufacturer"],
+            "packer": ["packer"],
+            "importer": ["importer"],
+            "consumer_care": ["consumer_care", "consumerCare"],
+            "country_of_origin": ["country_of_origin", "countryOfOrigin"],
+            "generic_name": ["generic_name", "genericName"],
+            "unit_sale_price": ["unit_sale_price", "unitSalePrice"],
+            "best_before": ["best_before", "bestBefore"],
+            "expiry_date": ["expiry_date", "expiryDate"]
+        }
+
+        for base_key, aliases in field_mapping.items():
+            fact_item = res_dict.get("unified_facts", {}).get(base_key, {})
+            val = fact_item.get("consensus_value") if isinstance(fact_item, dict) else None
+            conf = float(fact_item.get("mean_confidence", fact_item.get("confidence", 0.0))) if isinstance(fact_item, dict) else 0.0
+            status_val = "CONFIDENT" if val and conf >= 0.70 else ("UNCERTAIN" if val else "MISSING")
+
+            field_obj = {
+                "fieldName": aliases[0],
+                "rawValue": str(val) if val is not None else "",
+                "normalizedValue": str(val) if val is not None else "",
+                "confidence": round(conf, 4),
+                "status": status_val,
+                "evidence": fact_item.get("candidate_sources", []) if isinstance(fact_item, dict) else []
+            }
+            for alias in aliases:
+                canonical_fields[alias] = field_obj
+
+        res_dict["fields"] = canonical_fields
+        res_dict["requestId"] = request_id
+        res_dict["request_id"] = request_id
+        res_dict["inspectionId"] = final_inspection_id
+        res_dict["inspection_id"] = final_inspection_id
+        res_dict["status"] = result.overall_status
+        res_dict["modelVersion"] = "1.2.3"
+        res_dict["ruleVersion"] = "PCR-2011.v2"
+        res_dict["humanReview"] = []
+
+        save_session_to_disk(final_inspection_id, res_dict)
+        if final_inspection_id != result.inspection_id:
+            save_session_to_disk(result.inspection_id, res_dict)
+
         return res_dict
 
     except SecurityValidationError as se:
@@ -123,30 +181,95 @@ async def submit_human_review(
     reason: str,
     user_role: str = "LEGAL_METROLOGY_OFFICER"
 ):
-    """Submit a human auditor override event."""
+    """Submit a human auditor override event with compliance re-evaluation."""
     session_data = get_session_from_disk(inspection_id)
     if not session_data:
-        raise HTTPException(status_code=404, detail="Inspection session not found.")
-    
+        raise HTTPException(status_code=404, detail=f"Inspection session '{inspection_id}' not found.")
+
+    old_val = session_data.get("unified_facts", {}).get(field_name, {}).get("consensus_value")
     event = audit_service.log_override(
         inspection_id=inspection_id,
         field_name=field_name,
-        old_value=session_data["unified_facts"].get(field_name, {}).get("consensus_value"),
+        old_value=old_val,
         new_value=new_value,
         reason=reason,
         user_role=user_role
     )
-    return {"status": "SUCCESS", "event": event.to_dict()}
+
+    # Update session data
+    if "unified_facts" not in session_data:
+        session_data["unified_facts"] = {}
+    if field_name not in session_data["unified_facts"]:
+        session_data["unified_facts"][field_name] = {"field_name": field_name}
+    
+    session_data["unified_facts"][field_name]["consensus_value"] = new_value
+    session_data["unified_facts"][field_name]["confidence"] = 1.0
+    session_data["unified_facts"][field_name]["is_contradictory"] = False
+
+    # Also update canonical fields
+    if "fields" in session_data:
+        if field_name in session_data["fields"]:
+            session_data["fields"][field_name]["rawValue"] = new_value
+            session_data["fields"][field_name]["normalizedValue"] = new_value
+            session_data["fields"][field_name]["confidence"] = 1.0
+            session_data["fields"][field_name]["status"] = "CONFIDENT"
+
+    if "humanReview" not in session_data:
+        session_data["humanReview"] = []
+    session_data["humanReview"].append(event.to_dict())
+
+    # Re-evaluate compliance result
+    try:
+        from ml.extraction.types import ProductFacts
+        synthetic_facts = ProductFacts(product_id=inspection_id)
+        audited_facts = pipeline.conf_pipe.process(synthetic_facts, image_input=None, ocr_result=None)
+        for k, v in session_data["unified_facts"].items():
+            if k in audited_facts.fields:
+                c_val = v.get("consensus_value")
+                audited_facts.fields[k].raw_value = str(c_val) if c_val is not None else ""
+                audited_facts.fields[k].raw_text = str(c_val) if c_val is not None else ""
+                if c_val:
+                    audited_facts.fields[k].status = "CONFIDENT"
+
+        comp_res = pipeline.comp_pipe.evaluate(audited_facts)
+        session_data["compliance_result"] = comp_res.to_dict()
+        session_data["overall_status"] = session_data["compliance_result"].get("overall_status", "COMPLIANT")
+        session_data["status"] = session_data["overall_status"]
+    except Exception as re_err:
+        print(f"Compliance re-evaluation error: {re_err}")
+
+    # Persist updated session
+    save_session_to_disk(inspection_id, session_data)
+
+    return {
+        "status": "SUCCESS",
+        "event": event.to_dict(),
+        "inspection": session_data
+    }
+
 
 @app.get("/api/v1/report/pdf/{inspection_id}")
 async def download_pdf_report(inspection_id: str):
     """Download official regulatory PDF compliance report."""
     session_data = get_session_from_disk(inspection_id)
     if not session_data:
-        raise HTTPException(status_code=404, detail="Inspection session not found.")
+        raise HTTPException(status_code=404, detail=f"Inspection session '{inspection_id}' not found.")
 
     from reporting.pdf_exporter import generate_inspection_pdf
     pdf_path = generate_inspection_pdf(session_data)
+    return FileResponse(
+        path=pdf_path,
+        media_type="application/pdf",
+        filename=f"Compliance_Report_{inspection_id}.pdf"
+    )
+
+
+@app.post("/api/v1/report/pdf")
+async def generate_pdf_report_from_payload(payload: dict):
+    """Generate official regulatory PDF report from inspection payload."""
+    from reporting.pdf_exporter import generate_inspection_pdf
+    inspection_id = payload.get("inspection_id") or payload.get("inspectionId") or "UNKNOWN"
+    pdf_path = generate_inspection_pdf(payload)
     return FileResponse(
         path=pdf_path,
         media_type="application/pdf",

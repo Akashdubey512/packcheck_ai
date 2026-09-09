@@ -1,23 +1,30 @@
 export const API_ENDPOINTS = {
+  INSPECTIONS: {
+    INSPECT: '/inspect',
+    LIST: '/inspections',
+    GET_BY_ID: (id: string) => `/inspections/${id}`,
+    REVIEW: (id: string) => `/inspections/${id}/review`,
+    REPORT: (id: string) => `/inspections/${id}/report`,
+  },
   SCAN: {
-    UPLOAD: '/scan',
-    GET_BY_ID: (id: string) => `/scan/${id}`,
-    GET_OCR: (id: string) => `/scan/${id}/ocr`,
+    UPLOAD: '/inspect',
+    GET_BY_ID: (id: string) => `/inspections/${id}`,
+    GET_OCR: (id: string) => `/inspections/${id}/ocr`,
   },
   COMPLIANCE: {
     CHECK: (scanId: string) => `/compliance/${scanId}`,
-    DECISION_TRACE: (traceId: string) => `/compliance/trace/${traceId}`,
+    DECISION_TRACE: (traceId: string) => `/compliance/${traceId}`,
   },
   HISTORY: {
-    LIST: '/history',
+    LIST: '/inspections',
     EXPORT: '/history/export',
   },
   DASHBOARD: {
-    METRICS: '/dashboard',
+    METRICS: '/dashboard/metrics',
   },
   REPORTS: {
-    LIST: '/reports',
-    GET_BY_ID: (id: string) => `/reports/${id}`,
+    LIST: '/inspections',
+    GET_BY_ID: (id: string) => `/inspections/${id}/report`,
     GENERATE: '/reports/generate',
   },
   VERIFICATION: {
@@ -25,3 +32,4 @@ export const API_ENDPOINTS = {
     SUBMIT_BATCH: '/verify/batch',
   },
 } as const;
+
