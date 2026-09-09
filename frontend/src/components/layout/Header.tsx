@@ -6,7 +6,6 @@ import {
   Sun,
   Moon,
   Laptop,
-  Bell,
   UserCheck,
   ChevronDown,
   LogOut,
@@ -16,7 +15,6 @@ import {
 } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuth } from '@/hooks/useAuth';
-import { env } from '@/app/config/env';
 import { Role, ROLE_DEFINITIONS } from '@/types/user';
 import { ROUTES } from '@/constants/routes';
 import { butterSpring, modalPopoverVariants, gpuAcceleratedStyle } from '@/animations/motion';
@@ -66,22 +64,8 @@ export const Header: React.FC<HeaderProps> = ({
         </motion.div>
 
         <div className="flex flex-col cursor-pointer" onClick={() => navigate(ROUTES.HOME)}>
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-institutional-900 dark:text-sky-400 truncate max-w-[150px] sm:max-w-none">
-              Regulatory Compliance Platform
-            </span>
-            {env.VITE_DEMO_MODE ? (
-              <span className="text-[10px] font-semibold px-1 py-0.2 sm:px-1.5 sm:py-0.5 rounded bg-amber-100 text-amber-900 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300 dark:border-amber-800/80 uppercase">
-                Demo
-              </span>
-            ) : (
-              <span className="text-[10px] font-semibold px-1 py-0.2 sm:px-1.5 sm:py-0.5 rounded bg-emerald-100 text-emerald-900 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800/80 uppercase">
-                Live
-              </span>
-            )}
-          </div>
-          <span className="hidden sm:inline text-2xs text-slate-500 dark:text-slate-400 font-mono">
-            SEC-SYS // AUT-VER: 2026.09.2
+          <span className="text-xs font-bold uppercase tracking-wider text-institutional-900 dark:text-sky-400 truncate max-w-[150px] sm:max-w-none">
+            Regulatory Compliance Platform
           </span>
         </div>
       </div>
@@ -165,17 +149,6 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </AnimatePresence>
         </div>
-
-        {/* System Notification Bell */}
-        <motion.button
-          whileHover={{ rotate: [0, -12, 12, -6, 0], scale: 1.05 }}
-          whileTap={{ scale: 0.92 }}
-          type="button"
-          aria-label="System Notifications"
-          className="p-1.5 rounded text-slate-500 hover:text-foreground hover:bg-surface-muted transition-colors"
-        >
-          <Bell size={15} />
-        </motion.button>
 
         {/* Theme Mode Selector with Liquid Sliding Spring Pill */}
         <div className="relative flex items-center border border-border rounded bg-surface-muted p-0.5 text-slate-600 dark:text-slate-400">

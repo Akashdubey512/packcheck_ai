@@ -93,13 +93,18 @@ class ApiClient {
         let errorMessage = `Request failed with status ${response.status}`;
 
         try {
-          errorData = await response.json();
-          if (errorData && typeof errorData === 'object') {
-            const errObj = errorData as { error?: { message?: string }; message?: string };
-            errorMessage = errObj.error?.message || errObj.message || errorMessage;
+          const text = await response.text();
+          try {
+            errorData = JSON.parse(text);
+            if (errorData && typeof errorData === 'object') {
+              const errObj = errorData as { error?: { message?: string }; message?: string };
+              errorMessage = errObj.error?.message || errObj.message || errorMessage;
+            }
+          } catch {
+            errorData = text;
           }
         } catch {
-          errorData = await response.text();
+          // Stream could not be read
         }
 
         throw new ApiError(errorMessage, response.status, errorData, respRequestId);

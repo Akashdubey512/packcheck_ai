@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageShell } from '@/components/layout/PageShell';
-import { StatusBadge } from '@/components/ui/StatusBadge';
 import { BatchInput, QRVerificationCard } from '@/components/verification';
 import { buildRoute } from '@/constants/routes';
 
@@ -18,7 +17,6 @@ export const VerifyPage: React.FC = () => {
     <PageShell
       title="Statutory Batch &amp; QR Verification Gateway"
       description="Cryptographic proof validation and public packaging authenticity check against national electronic compliance registries."
-      badge={<StatusBadge status="info" customText="Public &amp; Trade Gateway" size="sm" />}
     >
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left: Input & Presets */}

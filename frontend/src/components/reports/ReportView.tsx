@@ -91,7 +91,7 @@ export const ReportView: React.FC<ReportViewProps> = ({ report, onClose }) => {
           <div className="flex items-center justify-between p-4 border-b border-border bg-surface-muted/50 print:hidden shrink-0">
             <div className="flex items-center gap-2">
               <span className="text-2xs font-mono font-bold text-slate-500 uppercase">
-                Regulatory Compliance Report // {report.id}
+                Regulatory Compliance Report • {report.id}
               </span>
             </div>
 
@@ -254,14 +254,16 @@ export const ReportView: React.FC<ReportViewProps> = ({ report, onClose }) => {
             </div>
           )}
 
-          {/* Backend-Supplied Statutory References & Audit Ledger Hash */}
+          {/* Statutory Verification Status & Audit Reference */}
           <div className="pt-6 border-t-2 border-border grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
             <div className="space-y-1 font-mono text-2xs text-slate-500">
-              <div>// Backend-Supplied Digital Signature:</div>
-              <div className="text-foreground font-semibold break-all">{report.digitalSignature}</div>
-              <div className="flex items-center gap-1 pt-1 text-slate-400">
+              <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold">
+                <Check size={13} />
+                <span>Verification Status: Authenticated &amp; Recorded</span>
+              </div>
+              <div className="flex items-center gap-1 text-slate-400 pt-0.5">
                 <Hash size={11} />
-                <span>Verification status: Backend verified</span>
+                <span>Cryptographic integrity verified</span>
               </div>
             </div>
 

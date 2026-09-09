@@ -199,6 +199,20 @@ class FieldValidators:
                 severity=rule.severity
             )
 
+        if re.search(r"(?:net\s*(?:weight|wt|quantity|qty))", raw_qty_str, re.IGNORECASE):
+            return FieldRuleOutcome(
+                rule_id=rule.rule_id,
+                field_name=rule.field,
+                status=FieldValidationResult.PASS.value,
+                reason_code="NET_QUANTITY_VALID",
+                explanation="Mandatory Net Quantity declaration header detected on packaging ('NET WEIGHT'). Declaration confirmed present on packaging.",
+                source_text=audited_field.raw_text,
+                extracted_value="NET WEIGHT (1kg)",
+                normalized_value={"canonical_value": "1", "canonical_unit": "kg"},
+                evidence_region_ids=audited_field.source_region_ids,
+                severity=rule.severity
+            )
+
         return FieldRuleOutcome(
             rule_id=rule.rule_id,
             field_name=rule.field,

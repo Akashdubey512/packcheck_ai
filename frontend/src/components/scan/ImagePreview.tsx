@@ -122,7 +122,6 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
             </div>
 
             <div className="p-3 rounded bg-surface-muted border border-border text-2xs space-y-1 font-mono text-slate-600 dark:text-slate-400">
-              <div className="font-semibold text-foreground">// Pre-Flight Telemetry:</div>
               <div>• Optical Resolution: PASS (Calculated &gt;= 300 DPI equivalent)</div>
               <div>• Color Space: sRGB Calibrated</div>
               <div>• Structural Framing: Full PDP Boundaries Detected</div>

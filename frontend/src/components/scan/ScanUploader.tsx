@@ -3,6 +3,7 @@ import { Upload, FileImage, Camera, Layers, AlertCircle, Loader2 } from 'lucide-
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { PRESET_LABEL_SAMPLES, PresetLabelSample } from '@/utils/sampleLabels';
+import { CameraModal } from '@/components/scan/CameraModal';
 
 import { motion } from 'framer-motion';
 import { staggerContainer, staggerItem, gpuAcceleratedStyle } from '@/animations/motion';
@@ -26,6 +27,7 @@ const ACCEPTED_TYPES = [
 export const ScanUploader: React.FC<ScanUploaderProps> = ({ onFileSelected, isUploading = false }) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
@@ -134,12 +136,28 @@ export const ScanUploader: React.FC<ScanUploaderProps> = ({ onFileSelected, isUp
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center space-y-4 max-w-md mx-auto">
-            <div className="w-14 h-14 rounded-full bg-surface-muted border border-border flex items-center justify-center text-primary shadow-subtle">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              aria-label="Upload Packaging Label Artifact"
+              title="Click to select packaging label image"
+              className="w-14 h-14 rounded-full bg-surface-muted border border-border flex items-center justify-center text-primary shadow-subtle cursor-pointer hover:bg-primary/10 hover:border-primary/40 hover:scale-105 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-primary/40"
+            >
               <Upload size={24} strokeWidth={2} />
-            </div>
+            </button>
 
-            <div className="space-y-1">
-              <h3 className="text-base font-semibold text-foreground">
+            <div
+              className="space-y-1 cursor-pointer select-none"
+              onClick={() => fileInputRef.current?.click()}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  fileInputRef.current?.click();
+                }
+              }}
+            >
+              <h3 className="text-base font-semibold text-foreground hover:text-primary transition-colors">
                 Upload Packaging Label Artifact
               </h3>
               <p className="text-xs text-slate-500 leading-relaxed">
@@ -162,7 +180,7 @@ export const ScanUploader: React.FC<ScanUploaderProps> = ({ onFileSelected, isUp
                 variant="outline"
                 size="sm"
                 disabled={isUploading}
-                onClick={() => cameraInputRef.current?.click()}
+                onClick={() => setIsCameraOpen(true)}
               >
                 <Camera size={14} className="mr-1.5" /> Capture with Camera
               </Button>
@@ -191,7 +209,6 @@ export const ScanUploader: React.FC<ScanUploaderProps> = ({ onFileSelected, isUp
               Demonstration Datasets (Mock Regulatory Cases for Testing)
             </span>
           </div>
-          <span className="text-2xs text-slate-500 font-mono">1-Click Test Loads</span>
         </div>
 
         <motion.div
@@ -240,6 +257,16 @@ export const ScanUploader: React.FC<ScanUploaderProps> = ({ onFileSelected, isUp
           })}
         </motion.div>
       </div>
+
+      <CameraModal
+        isOpen={isCameraOpen}
+        onClose={() => setIsCameraOpen(false)}
+        onCapture={(file) => {
+          setIsCameraOpen(false);
+          validateAndProcessFile(file);
+        }}
+        onBrowseFiles={() => fileInputRef.current?.click()}
+      />
     </div>
   );
 };

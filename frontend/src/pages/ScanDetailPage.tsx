@@ -365,7 +365,7 @@ export const ScanDetailPage: React.FC = () => {
       ) : scan && complianceResult ? (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* LEFT COLUMN: Evidence Viewer with Interactive Pan/Zoom & Overlays */}
-          <div className="lg:col-span-6 xl:col-span-7 space-y-4">
+          <div className="lg:col-span-6 xl:col-span-7 space-y-4 min-w-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Target size={16} className="text-primary" />
@@ -373,9 +373,6 @@ export const ScanDetailPage: React.FC = () => {
                   Statutory Evidence Viewport
                 </h3>
               </div>
-              <span className="text-2xs font-mono text-slate-500">
-                {Array.isArray(scan.ocrRegions) ? scan.ocrRegions.length : 0} Optical Bounding Polygons
-              </span>
             </div>
 
             <EvidenceViewer
@@ -411,7 +408,7 @@ export const ScanDetailPage: React.FC = () => {
           </div>
 
           {/* RIGHT COLUMN: Tabbed Compliance Assessment, Evidence Panel & Decision Trace */}
-          <div className="lg:col-span-6 xl:col-span-5 space-y-4">
+          <div className="lg:col-span-6 xl:col-span-5 space-y-4 min-w-0">
             {/* Workspace Navigation Tabs with Liquid Sliding Spring Indicator */}
             <div className="relative flex items-center gap-1 p-1 rounded bg-surface-muted border border-border">
               <button

@@ -57,12 +57,12 @@ export const ComplianceAssessment: React.FC<ComplianceAssessmentProps> = ({
       {/* Master Verdict Summary Banner */}
       <Card className="border border-border">
         <CardHeader className="pb-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="min-w-0">
               <span className="text-2xs font-semibold uppercase tracking-wider text-slate-500 block">
                 Statutory Assessment Summary
               </span>
-              <div className="flex items-center gap-3 mt-1">
+              <div className="flex flex-wrap items-center gap-2.5 mt-1">
                 <StatusBadge status={overallStatus} size="lg" />
                 <div className="font-mono text-xl font-bold text-foreground">
                   Score: <span className={overallStatus === 'violation' ? 'text-violation' : 'text-compliant'}>{safeScore.toFixed(1)}/100</span>
@@ -71,16 +71,16 @@ export const ComplianceAssessment: React.FC<ComplianceAssessmentProps> = ({
             </div>
 
             {/* Quick Count Badges */}
-            <div className="flex items-center gap-2">
-              <div className="px-2.5 py-1 rounded bg-violation-surface border border-violation-border text-xs flex items-center gap-1.5 font-semibold text-violation">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="px-2.5 py-1 rounded bg-violation-surface border border-violation-border text-xs flex items-center gap-1.5 font-semibold text-violation shrink-0">
                 <AlertOctagon size={13} />
                 <span>{violationCount} Violations</span>
               </div>
-              <div className="px-2.5 py-1 rounded bg-review-surface border border-review-border text-xs flex items-center gap-1.5 font-semibold text-review">
+              <div className="px-2.5 py-1 rounded bg-review-surface border border-review-border text-xs flex items-center gap-1.5 font-semibold text-review shrink-0">
                 <Clock size={13} />
                 <span>{reviewCount} Review</span>
               </div>
-              <div className="px-2.5 py-1 rounded bg-compliant-surface border border-compliant-border text-xs flex items-center gap-1.5 font-semibold text-compliant">
+              <div className="px-2.5 py-1 rounded bg-compliant-surface border border-compliant-border text-xs flex items-center gap-1.5 font-semibold text-compliant shrink-0">
                 <ShieldCheck size={13} />
                 <span>{compliantCount} Compliant</span>
               </div>
@@ -139,7 +139,7 @@ export const ComplianceAssessment: React.FC<ComplianceAssessmentProps> = ({
           </div>
 
           {/* Tab buttons */}
-          <div className="flex items-center gap-1.5 pt-2">
+          <div className="flex flex-wrap items-center gap-1.5 pt-2">
             <button
               type="button"
               onClick={() => setActiveTab('all')}

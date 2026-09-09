@@ -24,6 +24,8 @@ export const HistoryPage: React.FC = () => {
   const sortBy = filters.sortBy || 'timestamp';
   const sortOrder = (filters.sortOrder || 'desc') as 'asc' | 'desc';
 
+  const hasActiveFilters = Boolean(search || status || category || startDate || endDate);
+
   const fetchHistory = useCallback(() => {
     setLoading(true);
     setError(null);
@@ -76,26 +78,40 @@ export const HistoryPage: React.FC = () => {
 
   return (
     <PageShell
-      title="Packaging Compliance Inspection History"
-      description="Historical log of inspected product packaging labels, optical telemetry records, and statutory compliance assessments."
+      title="Packaging compliance inspection history"
+      description="Historical record of packaging inspections, compliance assessments, and evidence."
       badge={
-        <span className="text-2xs font-mono text-slate-500 bg-surface-muted px-2.5 py-1 rounded border border-border">
-          Total: <strong>{total}</strong> Records
+        <span className="text-xs font-medium text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-full border border-slate-200 dark:border-slate-700 select-none">
+          {total} records
         </span>
       }
       actions={
         <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline" onClick={fetchHistory} disabled={loading} aria-label="Refresh inspection history">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={fetchHistory}
+            disabled={loading}
+            aria-label="Refresh inspection history"
+            className="h-9 px-3.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 text-xs font-medium shadow-2xs"
+          >
             <RefreshCw size={13} className={`mr-1.5 ${loading ? 'animate-spin' : ''}`} /> Refresh
           </Button>
-          <Button size="sm" variant="primary" onClick={handleExportCSV} disabled={(items || []).length === 0} aria-label="Export history to CSV">
+          <Button
+            size="sm"
+            variant="primary"
+            onClick={handleExportCSV}
+            disabled={(items || []).length === 0}
+            aria-label="Export history to CSV"
+            className="h-9 px-3.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white dark:bg-teal-700 dark:hover:bg-teal-600 text-xs font-medium shadow-2xs"
+          >
             <Download size={13} className="mr-1.5" /> Export CSV
           </Button>
         </div>
       }
     >
       <div className="space-y-4">
-        {/* 1. Interactive Filters Toolbar */}
+        {/* 1. Coherent Filter Panel */}
         <HistoryFilters
           search={search}
           status={status}
@@ -122,17 +138,15 @@ export const HistoryPage: React.FC = () => {
           onSortChange={(newSortBy, newSortOrder) => {
             setParams({ sortBy: newSortBy, sortOrder: newSortOrder, page: 1 });
           }}
-          onReset={() => {
-            resetFilters();
-          }}
+          onReset={resetFilters}
         />
 
         {/* Actionable Error State */}
         {error && (
-          <div className="p-6 rounded border border-violation-border bg-violation-surface text-center space-y-3">
-            <AlertTriangle size={24} className="mx-auto text-violation" />
-            <div className="text-xs font-semibold text-violation-foreground">{error}</div>
-            <Button size="sm" variant="outline" onClick={fetchHistory}>
+          <div className="p-6 rounded-xl border border-rose-200 dark:border-rose-900 bg-rose-50/70 dark:bg-rose-950/40 text-center space-y-3">
+            <AlertTriangle size={24} className="mx-auto text-rose-600 dark:text-rose-400" />
+            <div className="text-xs font-semibold text-rose-900 dark:text-rose-200">{error}</div>
+            <Button size="sm" variant="outline" onClick={fetchHistory} className="text-xs">
               Retry Connection
             </Button>
           </div>
@@ -140,15 +154,25 @@ export const HistoryPage: React.FC = () => {
 
         {!error && (
           <>
-            {/* 2. Desktop Table */}
-            <HistoryTable items={items} loading={loading} />
+            {/* 2. Desktop Audit Data Table */}
+            <HistoryTable
+              items={items}
+              loading={loading}
+              onReset={resetFilters}
+              hasActiveFilters={hasActiveFilters}
+            />
 
-            {/* 3. Mobile Card Layout */}
-            <HistoryMobileCards items={items} loading={loading} />
+            {/* 3. Mobile Card View */}
+            <HistoryMobileCards
+              items={items}
+              loading={loading}
+              onReset={resetFilters}
+              hasActiveFilters={hasActiveFilters}
+            />
 
             {/* 4. Pagination Controls */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 pt-2 border-t border-border">
-              <div className="font-mono text-2xs">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 pt-2 border-t border-slate-200 dark:border-slate-800">
+              <div className="text-[11px] text-slate-500 font-medium">
                 Showing {items.length > 0 ? (pagination.page - 1) * pagination.limit + 1 : 0} to{' '}
                 {Math.min(pagination.page * pagination.limit, total)} of {total} inspections
               </div>
@@ -160,10 +184,11 @@ export const HistoryPage: React.FC = () => {
                   disabled={pagination.page <= 1 || loading}
                   onClick={() => setParam('page', pagination.page - 1)}
                   aria-label="Go to previous page"
+                  className="h-8 text-xs font-medium text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700"
                 >
                   <ChevronLeft size={14} className="mr-1" /> Previous
                 </Button>
-                <span className="font-mono text-xs px-2 text-foreground font-semibold">
+                <span className="text-xs px-2 text-slate-700 dark:text-slate-300 font-medium">
                   Page {pagination.page} / {totalPages}
                 </span>
                 <Button
@@ -172,6 +197,7 @@ export const HistoryPage: React.FC = () => {
                   disabled={pagination.page >= totalPages || loading}
                   onClick={() => setParam('page', pagination.page + 1)}
                   aria-label="Go to next page"
+                  className="h-8 text-xs font-medium text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700"
                 >
                   Next <ChevronRight size={14} className="ml-1" />
                 </Button>

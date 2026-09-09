@@ -142,17 +142,6 @@ export const HomePage: React.FC = () => {
       >
         {/* 1. CINEMATIC MINIMAL HERO */}
         <motion.div variants={staggerItem} className="text-center space-y-4 pt-2">
-          {/* Live Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/30 bg-surface-muted/90 shadow-xs text-2xs font-mono">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-            </span>
-            <span className="font-semibold text-foreground">STATUTORY PACKAGING METROLOGY</span>
-            <span className="text-slate-500">•</span>
-            <span className="text-primary font-bold">120 FPS ENGINE</span>
-          </div>
-
           {/* Punchy Headline */}
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-foreground leading-tight">
             Automated Label Compliance.{' '}
@@ -201,7 +190,6 @@ export const HomePage: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                     <span className="text-foreground font-bold">OPTICAL SENSOR</span>
-                    <span className="text-slate-400">// {currentCase.name}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="flex items-end gap-0.5 h-3">
@@ -442,7 +430,6 @@ export const HomePage: React.FC = () => {
             <span className="flex items-center gap-1 font-semibold uppercase text-foreground">
               <Layers size={13} className="text-primary" /> Instant Benchmark Scenarios
             </span>
-            <span>1-Click Test Runs</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

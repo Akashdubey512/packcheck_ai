@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { PageShell } from '@/components/layout/PageShell';
-import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/Button';
 import {
   ComplianceOverview,
@@ -35,7 +34,6 @@ export const DashboardPage: React.FC = () => {
     <PageShell
       title="Compliance Overview & Analytics"
       description="Consolidated packaging compliance rates, inspection volume trends, and statutory infraction alerts."
-      badge={<StatusBadge status="compliant" customText="Live Telemetry" size="sm" />}
       actions={
         <Button size="sm" variant="outline" onClick={fetchMetrics} disabled={isRefreshing}>
           <RotateCw size={13} className={`mr-1.5 ${isRefreshing ? 'animate-spin' : ''}`} /> Refresh Metrics

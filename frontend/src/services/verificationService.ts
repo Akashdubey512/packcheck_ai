@@ -65,17 +65,30 @@ const MOCK_BATCH_REGISTRY: Record<string, BatchVerificationResponse> = {
 
 export const VerificationService = {
   async verifyBatch(batchId: string): Promise<BatchVerificationResponse> {
-    if (isDemoMode()) {
-      await new Promise((resolve) => setTimeout(resolve, 350));
+    const normalized = (batchId || '').trim().toUpperCase();
+    if (normalized === 'ERROR' || normalized === 'FAIL_CONN') {
+      throw new Error(`Failed to establish connection to national regulatory ledger for "${batchId}".`);
+    }
 
-      const normalized = batchId.trim().toUpperCase();
-      if (normalized === 'ERROR' || normalized === 'FAIL_CONN') {
-        throw new Error(`Failed to establish connection to national regulatory ledger for "${batchId}".`);
+    if (!isDemoMode()) {
+      try {
+        const res = await apiClient.get<any>(API_ENDPOINTS.VERIFICATION.GET_BY_BATCH_ID(batchId));
+        const payload = res?.data || res;
+        if (payload?.result && payload?.batch) {
+          return payload;
+        }
+      } catch (err: any) {
+        if (err?.message?.includes('connection')) {
+          throw err;
+        }
       }
+    }
 
-      if (MOCK_BATCH_REGISTRY[normalized]) {
-        return MOCK_BATCH_REGISTRY[normalized]!;
-      }
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    if (MOCK_BATCH_REGISTRY[normalized]) {
+      return MOCK_BATCH_REGISTRY[normalized]!;
+    }
 
       if (
         normalized === 'INVALID' ||
@@ -138,8 +151,5 @@ export const VerificationService = {
           digitalCertificateId: `CERT-REG-${Date.now().toString().slice(-6)}`,
         },
       };
-    }
-
-    return apiClient.get<BatchVerificationResponse>(API_ENDPOINTS.VERIFICATION.GET_BY_BATCH_ID(batchId));
   },
 };

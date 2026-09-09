@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { QrCode, Copy, Check, Download, ExternalLink } from 'lucide-react';
 
 interface QRVerificationCardProps {
   batchId: string;
-  qrUrl?: string; // Backend-provided QR image URL (takes precedence over demo SVG generation)
+  qrUrl?: string; // Backend-provided QR image URL (takes precedence if available)
   verificationUrl?: string; // Backend-provided verification URL
   onOpenPublicVerification?: () => void;
 }
@@ -38,7 +39,7 @@ export const QRVerificationCard: React.FC<QRVerificationCardProps> = ({
       return;
     }
 
-    // Demo SVG fallback download
+    // Export real, mathematically valid vector SVG QR code
     const svgElement = document.getElementById(`qr-svg-${batchId}`);
     if (!svgElement) return;
 
@@ -65,9 +66,9 @@ export const QRVerificationCard: React.FC<QRVerificationCardProps> = ({
       </CardHeader>
 
       <CardContent className="p-6 flex flex-col items-center justify-center space-y-3">
-        {/* If backend-supplied QR image URL is available, render image directly; otherwise fallback to vector SVG */}
+        {/* Real Scannable QR Code */}
         {qrUrl ? (
-          <div className="p-2 bg-white rounded-lg border-2 border-slate-900 shadow-sm w-48 h-48 flex items-center justify-center">
+          <div className="p-3 bg-white rounded-xl border border-slate-200 shadow-xs w-48 h-48 flex items-center justify-center">
             <img
               src={qrUrl}
               alt={`Batch ${batchId} Verification QR Code`}
@@ -75,56 +76,16 @@ export const QRVerificationCard: React.FC<QRVerificationCardProps> = ({
             />
           </div>
         ) : (
-          <div className="p-3 bg-white rounded-lg border-2 border-slate-900 shadow-sm w-48 h-48 flex items-center justify-center">
-            {/* Demo Fallback Vector QR Code Pattern */}
-            <svg
+          <div className="p-3.5 bg-white rounded-xl border border-slate-200 shadow-xs w-48 h-48 flex items-center justify-center">
+            <QRCodeSVG
               id={`qr-svg-${batchId}`}
-              viewBox="0 0 100 100"
-              width="100%"
-              height="100%"
-              className="shape-rendering-crispEdges"
-            >
-              {/* Standard QR Corner Markers */}
-              <rect x="5" y="5" width="26" height="26" fill="#0f172a" />
-              <rect x="8" y="8" width="20" height="20" fill="#ffffff" />
-              <rect x="11" y="11" width="14" height="14" fill="#0f172a" />
-
-              <rect x="69" y="5" width="26" height="26" fill="#0f172a" />
-              <rect x="72" y="8" width="20" height="20" fill="#ffffff" />
-              <rect x="75" y="11" width="14" height="14" fill="#0f172a" />
-
-              <rect x="5" y="69" width="26" height="26" fill="#0f172a" />
-              <rect x="8" y="72" width="20" height="20" fill="#ffffff" />
-              <rect x="11" y="75" width="14" height="14" fill="#0f172a" />
-
-              {/* Simulated Data Matrix Modules */}
-              <rect x="36" y="8" width="6" height="6" fill="#0f172a" />
-              <rect x="46" y="8" width="6" height="6" fill="#0f172a" />
-              <rect x="56" y="8" width="6" height="6" fill="#0f172a" />
-
-              <rect x="36" y="20" width="6" height="6" fill="#0f172a" />
-              <rect x="50" y="20" width="6" height="6" fill="#0f172a" />
-
-              <rect x="8" y="38" width="6" height="6" fill="#0f172a" />
-              <rect x="20" y="38" width="6" height="6" fill="#0f172a" />
-              <rect x="36" y="36" width="12" height="12" fill="#0f172a" />
-              <rect x="54" y="38" width="6" height="6" fill="#0f172a" />
-              <rect x="68" y="38" width="6" height="6" fill="#0f172a" />
-              <rect x="80" y="38" width="6" height="6" fill="#0f172a" />
-
-              <rect x="36" y="52" width="6" height="6" fill="#0f172a" />
-              <rect x="48" y="52" width="14" height="6" fill="#0f172a" />
-              <rect x="68" y="52" width="6" height="6" fill="#0f172a" />
-
-              <rect x="36" y="68" width="6" height="6" fill="#0f172a" />
-              <rect x="48" y="68" width="6" height="6" fill="#0f172a" />
-              <rect x="60" y="68" width="14" height="6" fill="#0f172a" />
-              <rect x="80" y="68" width="6" height="6" fill="#0f172a" />
-
-              <rect x="36" y="82" width="14" height="6" fill="#0f172a" />
-              <rect x="56" y="82" width="6" height="6" fill="#0f172a" />
-              <rect x="68" y="82" width="14" height="6" fill="#0f172a" />
-            </svg>
+              value={verifyUrl}
+              size={164}
+              level="M"
+              includeMargin={false}
+              fgColor="#0f172a"
+              bgColor="#ffffff"
+            />
           </div>
         )}
 

@@ -25,7 +25,7 @@ export const ReportsPage: React.FC = () => {
       .then((data) => {
         const safeData = Array.isArray(data) ? data : [];
         setReports(safeData);
-        // Check if query param requests a specific report (e.g. ?id=rep_2026_001)
+        // Check if query param requests a specific report
         const targetId = searchParams.get('id');
         if (targetId) {
           const match = safeData.find((r) => r.id === targetId);

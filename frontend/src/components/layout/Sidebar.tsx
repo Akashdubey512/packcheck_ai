@@ -39,7 +39,7 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onCloseMobile }) => {
-  const { canAccess, role } = useAuth();
+  const { canAccess } = useAuth();
   const location = useLocation();
 
   // Close mobile drawer on Escape key press
@@ -60,10 +60,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onCloseMob
     <>
       {/* Primary Navigation */}
       <div className="p-3 space-y-1">
-        <div className="px-3 py-2 text-2xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center justify-between">
-          <span>Authorized Modules</span>
-          <span className="font-mono text-primary text-[10px] uppercase">[{role.slice(0, 5)}]</span>
-        </div>
         <nav className="space-y-1" aria-label="Main Navigation">
           {visibleNavItems.map((item) => {
             const Icon = item.icon;

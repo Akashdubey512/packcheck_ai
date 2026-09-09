@@ -27,20 +27,20 @@ export const ChecklistItem: React.FC<ChecklistItemProps> = ({
           : 'border-border hover:border-slate-400 dark:hover:border-slate-600 bg-surface'
       }`}
     >
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
+      <div className="flex flex-wrap sm:flex-nowrap items-start sm:items-center justify-between gap-2">
+        <div className="space-y-1 min-w-0 flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
             <StatusBadge status={check.status} size="sm" />
             <span className="text-2xs font-mono text-slate-400 uppercase">
               {check.ruleCategory}
             </span>
           </div>
-          <h4 className="text-xs font-semibold text-foreground leading-snug">
+          <h4 className="text-xs font-semibold text-foreground leading-snug break-words">
             {check.ruleName}
           </h4>
         </div>
 
-        <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+        <div className="flex items-center gap-2 shrink-0 ml-auto sm:ml-0">
           <div className="text-right">
             <span className="text-2xs text-slate-500 block">Extraction Conf.</span>
             <span className="text-xs font-mono font-bold text-foreground flex items-center gap-1 justify-end">
