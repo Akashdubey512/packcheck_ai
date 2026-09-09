@@ -22,6 +22,7 @@ function buildCanonicalFields(aiResult) {
     "unitSalePrice",
     "bestBefore",
     "expiryDate",
+    "batchNumber",
   ];
 
   const fieldKeyMap = {
@@ -39,6 +40,7 @@ function buildCanonicalFields(aiResult) {
     unitSalePrice: ["unit_sale_price", "unitSalePrice"],
     bestBefore: ["best_before_expiry", "expiry_or_use_by_date", "best_before", "bestBefore"],
     expiryDate: ["best_before_expiry", "expiry_or_use_by_date", "expiry_date", "expiryDate"],
+    batchNumber: ["batch_number", "lot_number", "batch_no", "lot_no", "b_no", "bno", "batchNumber"],
   };
 
   const fields = {};
@@ -114,6 +116,7 @@ export function formatInspectionForFrontend(inspection) {
     mfgDate: doc.fields?.manufactureDate?.normalizedValue,
     expDate: doc.fields?.expiryDate?.normalizedValue || doc.fields?.bestBefore?.normalizedValue,
     netWeight: doc.fields?.netQuantity?.normalizedValue,
+    batchNumber: doc.fields?.batchNumber?.normalizedValue || doc.fields?.batchNumber?.rawValue || doc.inspectionId,
   };
 
   return {

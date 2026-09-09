@@ -15,7 +15,9 @@ export interface ScanUploadResponse {
 const sessionScans = new Map<string, Scan>();
 
 export const ScanService = {
-  async uploadScan(file: File, sampleId?: string): Promise<ScanUploadResponse> {
+  async uploadScan(file: File | File[], sampleId?: string): Promise<ScanUploadResponse> {
+    const fileList = Array.isArray(file) ? file : [file];
+
     if (isDemoMode()) {
       await new Promise((resolve) => setTimeout(resolve, 600));
 
@@ -29,20 +31,20 @@ export const ScanService = {
         }
       }
 
-      if (!fileUrl) {
-        fileUrl = URL.createObjectURL(file);
+      if (!fileUrl && fileList.length > 0) {
+        fileUrl = URL.createObjectURL(fileList[0]);
       }
 
       return {
         scanId,
         status: 'READY',
         fileUrl,
-        message: 'Label artifact uploaded and verified for statutory preprocessing.',
+        message: `${fileList.length} packaging angle(s) verified for statutory multi-view preprocessing.`,
       };
     }
 
     const formData = new FormData();
-    formData.append('files', file);
+    fileList.forEach((f) => formData.append('files', f));
     if (sampleId) formData.append('sampleId', sampleId);
 
     const res = await apiClient.upload<any>(API_ENDPOINTS.SCAN.UPLOAD, formData, { timeoutMs: 60000 });
@@ -57,7 +59,7 @@ export const ScanService = {
       scanId,
       status: data.status || 'COMPLETED',
       fileUrl: normalized.fileUrl || '',
-      message: 'Label artifact uploaded and verified for statutory preprocessing.',
+      message: `${fileList.length} packaging angle(s) verified for statutory multi-view preprocessing.`,
     };
   },
 
@@ -139,6 +141,17 @@ export const ScanService = {
       ? result.ocrRegions
       : [];
 
+    // Ensure all OCR regions have guaranteed unique IDs even across multi-view merges
+    const seenRegionIds = new Set<string>();
+    ocrRegions = ocrRegions.map((r, idx) => {
+      let uniqueId = r.id || `reg_${idx}`;
+      if (seenRegionIds.has(uniqueId)) {
+        uniqueId = `${uniqueId}_${idx}`;
+      }
+      seenRegionIds.add(uniqueId);
+      return { ...r, id: uniqueId };
+    });
+
     // If no OCR regions from backend, synthesize useful regions from extracted fields that have text
     if (ocrRegions.length === 0 && extractedFields.length > 0) {
       ocrRegions = extractedFields
@@ -156,6 +169,15 @@ export const ScanService = {
         }));
     }
 
+    const normalizedImages = (images || []).map((img: any, idx: number) => ({
+      imageId: img.imageId || `img_${idx + 1}`,
+      url: (img.url || '').startsWith('/') ? `http://localhost:5000${img.url}` : (img.url || firstImageUrl),
+      filename: img.filename,
+      originalName: img.originalName,
+      viewType: img.viewType && img.viewType !== 'UNKNOWN' ? img.viewType : `PANEL_${idx + 1}`,
+      qualityStatus: img.qualityStatus,
+    }));
+
     return {
       id: data.id || data.inspectionId || id,
       fileName: data.fileName || data.originalName || images[0]?.filename || 'label.jpg',
@@ -164,6 +186,7 @@ export const ScanService = {
       fileUrl: firstImageUrl.startsWith('/')
         ? `http://localhost:5000${firstImageUrl}`
         : firstImageUrl,
+      images: normalizedImages,
       status: data.status === 'COMPLIANT' ? 'COMPLETED' : data.status || 'COMPLETED',
       uploadedAt: data.uploadedAt || data.createdAt || new Date().toISOString(),
       processedAt: data.processedAt || data.updatedAt || new Date().toISOString(),

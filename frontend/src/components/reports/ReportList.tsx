@@ -20,6 +20,69 @@ export const ReportList: React.FC<ReportListProps> = ({ reports, onSelectReport,
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
+  const printReport = (report: ComplianceReport) => {
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:none';
+    document.body.appendChild(iframe);
+    const d = iframe.contentWindow?.document;
+    if (!d) { window.print(); return; }
+    d.open();
+    d.write(`<!DOCTYPE html><html><head><title>Report ${report.id}</title>
+      <style>
+        body{font-family:-apple-system,sans-serif;font-size:12px;color:#0f172a;padding:32px}
+        h1{font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+        .mono{font-family:'Courier New',monospace} .lbl{font-size:10px;color:#64748b;text-transform:uppercase;display:block;margin-bottom:2px}
+        .val{font-weight:600} .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px}
+        .sec{margin-top:24px} .sec-title{font-size:10px;font-weight:700;text-transform:uppercase;border-bottom:1px solid #e2e8f0;padding-bottom:4px;margin-bottom:12px}
+        .stats{display:flex;gap:16px;margin-top:12px} .stat{border:1px solid #e2e8f0;padding:8px 16px;border-radius:6px;text-align:center}
+        .stat .n{font-size:20px;font-weight:700} .stat .l{font-size:9px;color:#64748b}
+        .vbox{border:1px solid #fca5a5;background:#fff5f5;padding:12px;border-radius:6px;margin-bottom:8px}
+        .foot{margin-top:32px;border-top:2px solid #0f172a;padding-top:16px;display:flex;justify-content:space-between;font-size:10px;color:#64748b}
+        @media print{body{padding:16px}}
+      </style></head><body>
+      <div style="display:flex;justify-content:space-between;align-items:start;border-bottom:2px solid #0f172a;padding-bottom:16px;margin-bottom:16px">
+        <div><h1>&#9679; Regulatory Compliance Report</h1><p class="mono" style="font-size:10px;color:#64748b">Legal Metrology Statutory Assessment</p></div>
+        <div class="mono" style="text-align:right;font-size:10px">
+          <div>REPORT: <strong>${report.id}</strong></div>
+          <div>DATE: ${new Date(report.generatedAt).toLocaleString()}</div>
+          <div>AUTH: ${report.generatedBy}</div>
+        </div>
+      </div>
+      <div class="sec">
+        <div class="sec-title">Statutory Inspection Finding</div>
+        <div style="font-weight:700;font-size:14px;color:${report.overallStatus==='compliant'?'#16a34a':report.overallStatus==='violation'?'#dc2626':'#d97706'}">
+          ${report.overallStatus==='compliant'?'COMPLIANT':report.overallStatus==='violation'?'VIOLATION':'REVIEW REQUIRED'}
+        </div>
+        <div class="stats">
+          <div class="stat"><div class="n">${report.totalChecks}</div><div class="l">Checks</div></div>
+          <div class="stat" style="border-color:#86efac"><div class="n" style="color:#16a34a">${report.passedChecks}</div><div class="l">Passed</div></div>
+          <div class="stat" style="border-color:#fca5a5"><div class="n" style="color:#dc2626">${report.failedChecks}</div><div class="l">Violations</div></div>
+        </div>
+      </div>
+      <div class="sec"><div class="sec-title">Product Particulars</div>
+        <div class="grid">
+          <div><span class="lbl">Product Name</span><span class="val">${report.productInfo.name}</span></div>
+          <div><span class="lbl">GTIN</span><span class="val mono">${report.productInfo.gtin||'N/A'}</span></div>
+          <div><span class="lbl">Manufacturer</span><span class="val">${report.productInfo.manufacturer||'N/A'}</span></div>
+          <div><span class="lbl">Batch Ref</span><span class="val mono">${report.productInfo.batchNumber||'N/A'}</span></div>
+        </div>
+      </div>
+      <div class="sec"><div class="sec-title">Executive Summary</div><p>${report.summary}</p></div>
+      ${report.violations.length>0?`<div class="sec"><div class="sec-title" style="color:#dc2626">Infractions (${report.violations.length})</div>
+        ${report.violations.map((v,i)=>`<div class="vbox"><strong>${v.title||v.ruleName||'Infraction '+(i+1)}</strong>
+          <p style="font-size:11px">${v.description||v.message||''}</p>
+          <div class="mono" style="font-size:10px">Clause: ${v.legalClause||'N/A'}</div></div>`).join('')}
+      </div>`:''}
+      <div class="foot">
+        <div style="color:#16a34a;font-weight:600">&#10003; Authenticated &amp; Recorded</div>
+        <div style="text-align:right">${report.generatedBy}<br/><span style="font-size:9px">Sig: ${report.digitalSignature?.slice(0,28)||'N/A'}...</span></div>
+      </div></body></html>`);
+    d.close();
+    iframe.contentWindow?.focus();
+    iframe.contentWindow?.print();
+    setTimeout(() => document.body.removeChild(iframe), 1000);
+  };
+
   const safeReports = Array.isArray(reports) ? reports : [];
 
   const filtered = safeReports.filter((r) => {
@@ -140,7 +203,7 @@ export const ReportList: React.FC<ReportListProps> = ({ reports, onSelectReport,
                     size="sm"
                     variant="ghost"
                     className="text-2xs h-7"
-                    onClick={() => onSelectReport(report)}
+                    onClick={() => printReport(report)}
                   >
                     <Printer size={11} className="mr-1" /> Print
                   </Button>

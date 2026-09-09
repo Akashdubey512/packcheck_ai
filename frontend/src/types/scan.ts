@@ -60,4 +60,12 @@ export interface Scan {
   extractedFields: ExtractedField[];
   complianceVerdict?: 'compliant' | 'violation' | 'review' | 'info';
   overallScore?: number;
+  images?: Array<{
+    imageId: string;
+    url: string;
+    filename?: string;
+    originalName?: string;
+    viewType?: string;
+    qualityStatus?: string;
+  }>;
 }

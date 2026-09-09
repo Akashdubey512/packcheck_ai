@@ -445,5 +445,24 @@ export const ComplianceService = {
 
     return apiClient.get<DecisionTrace>(API_ENDPOINTS.COMPLIANCE.DECISION_TRACE(traceId));
   },
+
+  async certifyInspection(scanId: string, role?: string, userId?: string): Promise<any> {
+    const token = localStorage.getItem('token') || '';
+    const res = await fetch(`http://localhost:5000/api/v1/inspections/${scanId}/certify`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(role ? { 'X-User-Role': role } : {}),
+        ...(userId ? { 'X-User-Id': userId } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ note: 'Statutory packaging declarations verified compliant by Legal Metrology Officer.' }),
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error?.message || `Certification failed: ${res.statusText}`);
+    }
+    return await res.json();
+  },
 };
 

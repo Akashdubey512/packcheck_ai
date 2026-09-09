@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 import { motion } from 'framer-motion';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -11,8 +12,8 @@ interface GenerateReportModalProps {
 }
 
 export const GenerateReportModal: React.FC<GenerateReportModalProps> = ({ onGenerate, onClose }) => {
-  const [title, setTitle] = useState('Fortified Multi-Grain Flakes Packaging Compliance Report');
-  const [scanId, setScanId] = useState('scn_sample_cereal_violations');
+  const [title, setTitle] = useState('');
+  const [scanId, setScanId] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   React.useEffect(() => {
@@ -36,8 +37,8 @@ export const GenerateReportModal: React.FC<GenerateReportModalProps> = ({ onGene
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+  const modalContent = (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
       {/* Backdrop */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -96,21 +97,15 @@ export const GenerateReportModal: React.FC<GenerateReportModalProps> = ({ onGene
                 <label className="block text-xs font-semibold text-foreground mb-1">
                   Source Inspection Reference
                 </label>
-                <select
+                <input
+                  type="text"
                   value={scanId}
                   onChange={(e) => setScanId(e.target.value)}
-                  className="w-full px-3 py-2 text-xs rounded-lg border border-border bg-surface-subtle text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-all"
-                >
-                  <option value="scn_sample_cereal_violations">
-                    Apex Fortified Cereal (Violations Detected) - scn_sample_cereal_violations
-                  </option>
-                  <option value="scn_sample_dairy_compliant">
-                    Apex Pasteurized Milk (Compliant) - scn_sample_dairy_compliant
-                  </option>
-                  <option value="scn_sample_tea_review">
-                    Botanical Green Tea (Review Required) - scn_sample_tea_review
-                  </option>
-                </select>
+                  required
+                  placeholder="e.g. INSP_MTUGKQCA_E2F1D7"
+                  className="w-full px-3 py-2 text-xs rounded-lg border border-border bg-surface-subtle text-foreground focus:outline-none focus:ring-1 focus:ring-primary transition-all font-mono"
+                />
+                <p className="mt-1 text-2xs text-slate-500">Paste the Inspection ID from Audit History or Scan Result page</p>
               </div>
 
               <div className="p-3 rounded-lg bg-surface-muted border border-border text-2xs space-y-1 text-slate-600 dark:text-slate-400">
@@ -137,5 +132,7 @@ export const GenerateReportModal: React.FC<GenerateReportModalProps> = ({ onGene
       </motion.div>
     </div>
   );
+
+  return ReactDOM.createPortal(modalContent, document.body);
 };
 

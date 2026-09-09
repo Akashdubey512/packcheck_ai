@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { PublicVerificationView, QRVerificationCard } from '@/components/verification';
 import { VerificationService, BatchVerificationResponse } from '@/services/verificationService';
 import { ROUTES } from '@/constants/routes';
-import { ArrowLeft, RotateCw, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, RotateCw, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { staggerContainer, staggerItem, gpuAcceleratedStyle } from '@/animations/motion';
 
 export const VerifyBatchPage: React.FC = () => {
@@ -44,14 +44,31 @@ export const VerifyBatchPage: React.FC = () => {
       badge={
         data ? (
           <StatusBadge
-            status={data.result.isValid && data.batch.complianceStatus === 'compliant' ? 'compliant' : 'violation'}
-            customText={data.result.isValid && data.batch.complianceStatus === 'compliant' ? 'Verified Authentic' : 'Flagged Non-Compliant'}
+            status={
+              data.batch.complianceStatus === 'compliant'
+                ? 'compliant'
+                : data.batch.complianceStatus === 'review'
+                ? 'review'
+                : 'violation'
+            }
+            customText={
+              data.batch.complianceStatus === 'compliant'
+                ? 'Verified Authentic'
+                : data.batch.complianceStatus === 'review'
+                ? 'Review Required'
+                : 'Flagged Non-Compliant'
+            }
             size="sm"
           />
         ) : null
       }
       actions={
         <div className="flex items-center gap-2">
+          {data?.batch?.id && (
+            <Button size="sm" variant="primary" onClick={() => navigate(`/scan/${data.batch.id}`)}>
+              <ShieldCheck size={13} className="mr-1" /> Open Inspection Workspace
+            </Button>
+          )}
           <Button size="sm" variant="outline" onClick={() => navigate(ROUTES.VERIFY)}>
             <ArrowLeft size={13} className="mr-1" /> New Verification
           </Button>

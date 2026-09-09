@@ -92,12 +92,22 @@ export const EvidenceViewer: React.FC<EvidenceViewerProps> = ({
     }
   };
 
-  // Mouse wheel zoom
-  const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    const zoomDelta = e.deltaY * -0.0015;
-    setScale((prev) => Math.min(Math.max(0.6, prev + zoomDelta), 4.0));
-  };
+  // Mouse wheel zoom with non-passive event listener to allow preventDefault safely
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const zoomDelta = e.deltaY * -0.0015;
+      setScale((prev) => Math.min(Math.max(0.6, prev + zoomDelta), 4.0));
+    };
+
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => {
+      el.removeEventListener('wheel', onWheel);
+    };
+  }, []);
 
   // Pointer events for unified Mouse + Touch pan handling
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -158,7 +168,6 @@ export const EvidenceViewer: React.FC<EvidenceViewerProps> = ({
       className={`relative w-full rounded border border-border bg-slate-950 overflow-hidden flex flex-col select-none ${
         isFullscreen ? 'fixed inset-0 z-50 rounded-none h-screen' : 'h-[540px]'
       }`}
-      onWheel={handleWheel}
       role="region"
       aria-label="Interactive packaging evidence label viewer"
     >

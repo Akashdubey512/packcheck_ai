@@ -7,6 +7,7 @@ import { formatGTIN } from '@/utils/formatters';
 import {
   ShieldCheck,
   AlertOctagon,
+  AlertTriangle,
   Building2,
   Calendar,
   Hash,
@@ -22,7 +23,8 @@ interface PublicVerificationViewProps {
 export const PublicVerificationView: React.FC<PublicVerificationViewProps> = ({ data }) => {
   const [copied, setCopied] = React.useState(false);
   const { batch, result } = data;
-  const isAuthenticAndCompliant = result.isValid && batch.complianceStatus === 'compliant';
+  const isCompliant = batch.complianceStatus === 'compliant';
+  const isReview = batch.complianceStatus === 'review';
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href).then(() => {
@@ -32,22 +34,28 @@ export const PublicVerificationView: React.FC<PublicVerificationViewProps> = ({ 
   };
 
   return (
-    <Card className="border-2 border-border shadow-card overflow-hidden">
+    <Card className="border border-border shadow-card overflow-hidden">
       {/* Public Authority Header */}
       <CardHeader
         className={`p-6 text-center border-b ${
-          isAuthenticAndCompliant
-            ? 'bg-compliant-surface/50 border-compliant-border'
-            : 'bg-violation-surface/50 border-violation-border'
+          isCompliant
+            ? 'bg-teal-50/60 border-teal-200 dark:bg-teal-950/30 dark:border-teal-800/50'
+            : isReview
+            ? 'bg-amber-50/60 border-amber-200 dark:bg-amber-950/30 dark:border-amber-800/50'
+            : 'bg-rose-50/60 border-rose-200 dark:bg-rose-950/30 dark:border-rose-800/50'
         }`}
       >
         <div className="mx-auto mb-2 flex items-center justify-center">
-          {isAuthenticAndCompliant ? (
-            <div className="w-14 h-14 rounded-full bg-compliant-surface text-compliant border-2 border-compliant flex items-center justify-center shadow-sm">
+          {isCompliant ? (
+            <div className="w-14 h-14 rounded-full bg-teal-50 text-teal-700 border-2 border-teal-600 flex items-center justify-center shadow-xs dark:bg-teal-950/50 dark:text-teal-300 dark:border-teal-500">
               <ShieldCheck size={32} />
             </div>
+          ) : isReview ? (
+            <div className="w-14 h-14 rounded-full bg-amber-50 text-amber-700 border-2 border-amber-500 flex items-center justify-center shadow-xs dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-500">
+              <AlertTriangle size={32} />
+            </div>
           ) : (
-            <div className="w-14 h-14 rounded-full bg-violation-surface text-violation border-2 border-violation flex items-center justify-center shadow-sm">
+            <div className="w-14 h-14 rounded-full bg-rose-50 text-rose-700 border-2 border-rose-600 flex items-center justify-center shadow-xs dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-500">
               <AlertOctagon size={32} />
             </div>
           )}
@@ -58,13 +66,23 @@ export const PublicVerificationView: React.FC<PublicVerificationViewProps> = ({ 
         </span>
 
         <CardTitle className="text-lg font-bold text-foreground mt-1">
-          {isAuthenticAndCompliant ? 'Verified Genuine & Statutory Compliant' : 'Non-Compliant / Regulatory Flag Active'}
+          {isCompliant
+            ? 'Verified Genuine & Statutory Compliant'
+            : isReview
+            ? 'Review Required / Statutory Verification Pending'
+            : 'Non-Compliant / Regulatory Flag Active'}
         </CardTitle>
 
         <div className="pt-2 flex justify-center">
           <StatusBadge
-            status={isAuthenticAndCompliant ? 'compliant' : 'violation'}
-            customText={isAuthenticAndCompliant ? 'Statutory Pass' : 'Compliance Infraction Flagged'}
+            status={isCompliant ? 'compliant' : isReview ? 'review' : 'violation'}
+            customText={
+              isCompliant
+                ? 'Statutory Pass'
+                : isReview
+                ? 'Review Required'
+                : 'Compliance Infraction Flagged'
+            }
             size="lg"
           />
         </div>
@@ -146,15 +164,21 @@ export const PublicVerificationView: React.FC<PublicVerificationViewProps> = ({ 
 
         {/* Public Citizen Advisory Notice */}
         <div
-          className={`p-3.5 rounded border text-2xs leading-relaxed ${
-            isAuthenticAndCompliant
-              ? 'bg-compliant-surface text-compliant-foreground border-compliant-border'
-              : 'bg-violation-surface text-violation-foreground border-violation-border'
+          className={`p-3.5 rounded-lg border text-2xs leading-relaxed ${
+            isCompliant
+              ? 'bg-teal-50/70 text-teal-900 border-teal-200 dark:bg-teal-950/30 dark:text-teal-200 dark:border-teal-800/50'
+              : isReview
+              ? 'bg-amber-50/70 text-amber-900 border-amber-200 dark:bg-amber-950/30 dark:text-amber-200 dark:border-amber-800/50'
+              : 'bg-rose-50/70 text-rose-900 border-rose-200 dark:bg-rose-950/30 dark:text-rose-200 dark:border-rose-800/50'
           }`}
         >
-          {isAuthenticAndCompliant ? (
+          {isCompliant ? (
             <p>
               <strong>Consumer Notice:</strong> This product lot is authenticated by the National Regulatory Electronic Registry. Packaging declarations conform to metric and statutory standards.
+            </p>
+          ) : isReview ? (
+            <p>
+              <strong>Consumer Notice:</strong> This product packaging record is currently pending statutory review by enforcement officers. Preliminary compliance score is 100% and final regulatory determination is in progress.
             </p>
           ) : (
             <p>

@@ -48,9 +48,12 @@ export const BatchInput: React.FC<BatchInputProps> = ({
       <CardContent className="space-y-4 pt-1">
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label htmlFor="batchInput" className="block text-xs font-semibold text-foreground mb-1">
-              Manufactured Batch / Lot Identifier
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label htmlFor="batchInput" className="block text-xs font-semibold text-foreground">
+                Manufactured Batch / Lot or Inspection ID
+              </label>
+              <span className="text-[11px] text-slate-400">Real Scans &amp; Presets</span>
+            </div>
             <div className="relative">
               <Search size={14} className="absolute left-3 top-3 text-slate-400" />
               <input
@@ -58,11 +61,14 @@ export const BatchInput: React.FC<BatchInputProps> = ({
                 type="text"
                 value={batchId}
                 onChange={(e) => setBatchId(e.target.value)}
-                placeholder="e.g. LOT-2026-X89, MLK-882-A"
+                placeholder="e.g. LOT-2026-X89, MLK-882-A, or any INSP_ ID"
                 required
                 className="w-full pl-9 pr-3 py-2 text-xs rounded border border-border bg-surface-subtle text-foreground focus:outline-none focus:ring-1 focus:ring-primary font-mono uppercase"
               />
             </div>
+            <p className="text-[11px] text-slate-400 mt-1">
+              Enter any real uploaded inspection ID / Lot No. to verify live scan records, or choose a mock preset below.
+            </p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-2">

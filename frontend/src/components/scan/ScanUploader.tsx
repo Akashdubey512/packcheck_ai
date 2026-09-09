@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
 import { staggerContainer, staggerItem, gpuAcceleratedStyle } from '@/animations/motion';
 
 interface ScanUploaderProps {
-  onFileSelected: (file: File, sampleId?: string) => void;
+  onFileSelected: (files: File[], sampleId?: string) => void;
   isUploading?: boolean;
 }
 
@@ -31,17 +31,24 @@ export const ScanUploader: React.FC<ScanUploaderProps> = ({ onFileSelected, isUp
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
-  const validateAndProcessFile = (file: File, sampleId?: string) => {
+  const validateAndProcessFiles = (files: File[], sampleId?: string) => {
     setErrorMessage(null);
+    if (!files || files.length === 0) return;
 
-    // Accept specified image formats
-    const isAccepted = ACCEPTED_TYPES.includes(file.type) || /\.(jpe?g|png|webp|svg|gif|bmp)$/i.test(file.name);
-    if (!isAccepted && !sampleId) {
-      setErrorMessage('Unsupported file format. Please upload JPG, PNG, WEBP, SVG, GIF, or BMP packaging label images.');
+    const validFiles: File[] = [];
+    for (const file of files) {
+      const isAccepted = ACCEPTED_TYPES.includes(file.type) || /\.(jpe?g|png|webp|svg|gif|bmp)$/i.test(file.name);
+      if (isAccepted || sampleId) {
+        validFiles.push(file);
+      }
+    }
+
+    if (validFiles.length === 0) {
+      setErrorMessage('Unsupported file format. Please upload JPG, PNG, WEBP, SVG, GIF, or BMP packaging images.');
       return;
     }
 
-    onFileSelected(file, sampleId);
+    onFileSelected(validFiles, sampleId);
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -49,10 +56,8 @@ export const ScanUploader: React.FC<ScanUploaderProps> = ({ onFileSelected, isUp
     setIsDragOver(false);
 
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const file = e.dataTransfer.files[0];
-      if (file) {
-        validateAndProcessFile(file);
-      }
+      const files = Array.from(e.dataTransfer.files);
+      validateAndProcessFiles(files);
     }
   };
 
@@ -61,11 +66,11 @@ export const ScanUploader: React.FC<ScanUploaderProps> = ({ onFileSelected, isUp
       const response = await fetch(sample.imageUrl);
       const blob = await response.blob();
       const file = new File([blob], sample.fileName, { type: 'image/svg+xml' });
-      validateAndProcessFile(file, sample.id);
+      validateAndProcessFiles([file], sample.id);
     } catch {
       // Fallback file
       const file = new File(['mock'], sample.fileName, { type: 'image/svg+xml' });
-      validateAndProcessFile(file, sample.id);
+      validateAndProcessFiles([file], sample.id);
     }
   };
 
@@ -94,11 +99,13 @@ export const ScanUploader: React.FC<ScanUploaderProps> = ({ onFileSelected, isUp
         <input
           ref={fileInputRef}
           type="file"
+          multiple
           accept=".jpg,.jpeg,.png,.webp,.svg,.bmp,.gif,image/*"
           className="hidden"
           onChange={(e) => {
-            if (e.target.files && e.target.files[0]) {
-              validateAndProcessFile(e.target.files[0]);
+            if (e.target.files && e.target.files.length > 0) {
+              const files = Array.from(e.target.files);
+              validateAndProcessFiles(files);
             }
           }}
         />
@@ -109,8 +116,9 @@ export const ScanUploader: React.FC<ScanUploaderProps> = ({ onFileSelected, isUp
           capture="environment"
           className="hidden"
           onChange={(e) => {
-            if (e.target.files && e.target.files[0]) {
-              validateAndProcessFile(e.target.files[0]);
+            if (e.target.files && e.target.files.length > 0) {
+              const files = Array.from(e.target.files);
+              validateAndProcessFiles(files);
             }
           }}
         />
@@ -123,24 +131,29 @@ export const ScanUploader: React.FC<ScanUploaderProps> = ({ onFileSelected, isUp
 
             <div className="space-y-1 text-center">
               <h3 className="text-base font-semibold text-foreground">
-                Uploading & Analyzing Packaging Artifact...
+                Uploading & Analyzing 360° Packaging Panels...
               </h3>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Running optical character recognition & Legal Metrology statutory compliance evaluation.
+                Running multi-angle OCR, cross-view candidate fusion & Legal Metrology statutory compliance evaluation.
               </p>
             </div>
 
             <div className="flex items-center gap-2 text-2xs font-mono text-primary font-semibold animate-pulse pt-1">
-              <span>Stage 1 AI Pipeline Active...</span>
+              <span>Multi-View Fusion Pipeline Active...</span>
             </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center space-y-4 max-w-md mx-auto">
+          <div className="flex flex-col items-center justify-center space-y-3 max-w-md mx-auto">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-2xs font-mono font-bold text-primary mb-1">
+              <Layers size={13} />
+              <span>360° MULTI-ANGLE SCAN (1 TO 6 PANELS)</span>
+            </div>
+
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              aria-label="Upload Packaging Label Artifact"
-              title="Click to select packaging label image"
+              aria-label="Upload Packaging Label Artifacts"
+              title="Click to select multiple packaging angle images"
               className="w-14 h-14 rounded-full bg-surface-muted border border-border flex items-center justify-center text-primary shadow-subtle cursor-pointer hover:bg-primary/10 hover:border-primary/40 hover:scale-105 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-primary/40"
             >
               <Upload size={24} strokeWidth={2} />
@@ -158,10 +171,10 @@ export const ScanUploader: React.FC<ScanUploaderProps> = ({ onFileSelected, isUp
               }}
             >
               <h3 className="text-base font-semibold text-foreground hover:text-primary transition-colors">
-                Upload Packaging Label Artifact
+                Upload Packaging Panels (1 to 6 Images)
               </h3>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                Drag and drop product front or back panel image, or browse local inspection files.
+              <p className="text-xs text-slate-500 leading-relaxed max-w-sm mx-auto">
+                Drag and drop 2 to 4 angles (Front PDP, Back Info Panel, Sides) for 100% full statutory coverage and cross-view contradiction checks.
               </p>
             </div>
 
@@ -173,7 +186,7 @@ export const ScanUploader: React.FC<ScanUploaderProps> = ({ onFileSelected, isUp
                 disabled={isUploading}
                 onClick={() => fileInputRef.current?.click()}
               >
-                <FileImage size={14} className="mr-1.5" /> Select Image File
+                <FileImage size={14} className="mr-1.5" /> Select Images (Hold Ctrl/Shift for multiple)
               </Button>
               <Button
                 type="button"
@@ -187,7 +200,7 @@ export const ScanUploader: React.FC<ScanUploaderProps> = ({ onFileSelected, isUp
             </div>
 
             <div className="text-2xs text-slate-400 font-mono pt-1">
-              Supported Formats: JPG, JPEG, PNG, WEBP, SVG, GIF, BMP
+              Supported Formats: JPG, JPEG, PNG, WEBP, SVG, GIF, BMP • Up to 10 files
             </div>
           </div>
         )}

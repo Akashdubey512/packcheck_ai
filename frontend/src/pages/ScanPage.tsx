@@ -25,8 +25,8 @@ export const ScanPage: React.FC = () => {
     reset,
   } = useScanState();
 
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [activeFile, setActiveFile] = useState<File | null>(null);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [activeFiles, setActiveFiles] = useState<File[]>([]);
   const [activeScanId, setActiveScanId] = useState<string>('scn_sample_cereal');
 
   // Handle URL preset query parameter (e.g. /scan?preset=sample_cereal_violations)
@@ -39,8 +39,8 @@ export const ScanPage: React.FC = () => {
           .then((r) => r.blob())
           .then((blob) => {
             const file = new File([blob], sample.fileName, { type: 'image/svg+xml' });
-            setActiveFile(file);
-            setPreviewUrl(sample.imageUrl);
+            setActiveFiles([file]);
+            setPreviewUrls([sample.imageUrl]);
             setActiveScanId(`scn_${sample.id}`);
             startUpload(file);
             uploadSuccess(`scn_${sample.id}`);
@@ -50,19 +50,16 @@ export const ScanPage: React.FC = () => {
     }
   }, [searchParams, startUpload, uploadSuccess]);
 
-  const handleFileSelected = async (file: File, sampleId?: string) => {
-    setActiveFile(file);
-    const localUrl = URL.createObjectURL(file);
-    setPreviewUrl(localUrl);
-    startUpload(file);
+  const handleFileSelected = async (files: File[], sampleId?: string) => {
+    setActiveFiles(files);
+    const localUrls = files.map((f) => URL.createObjectURL(f));
+    setPreviewUrls(localUrls);
+    startUpload(files[0] || ({} as File));
 
     try {
-      const response = await ScanService.uploadScan(file, sampleId);
+      const response = await ScanService.uploadScan(files, sampleId);
       const finalScanId = response.scanId || (sampleId ? `scn_${sampleId}` : `scn_sample_cereal_violations`);
       setActiveScanId(finalScanId);
-      if (response.fileUrl && (response.fileUrl.startsWith('http') || response.fileUrl.startsWith('data:'))) {
-        setPreviewUrl(response.fileUrl);
-      }
       uploadSuccess(finalScanId);
     } catch (err: any) {
       console.error('Packaging artifact upload error:', err);
@@ -70,7 +67,7 @@ export const ScanPage: React.FC = () => {
         err?.response?.data?.error?.message ||
         err?.response?.data?.detail ||
         err?.message ||
-        'An error occurred while uploading or parsing the packaging label image.';
+        'An error occurred while uploading or parsing packaging label images.';
       uploadFailed(errorMessage);
     }
   };
@@ -85,21 +82,25 @@ export const ScanPage: React.FC = () => {
     navigate(buildRoute.scanDetail(activeScanId));
   };
 
-  // Clean up object URL when component unmounts or preview changes
+  // Clean up object URLs only when component unmounts
   useEffect(() => {
     return () => {
-      if (previewUrl && previewUrl.startsWith('blob:')) {
-        URL.revokeObjectURL(previewUrl);
-      }
+      previewUrls.forEach((url) => {
+        if (url && url.startsWith('blob:')) {
+          URL.revokeObjectURL(url);
+        }
+      });
     };
-  }, [previewUrl]);
+  }, []);
 
   const handleCancelPreview = () => {
-    if (previewUrl && previewUrl.startsWith('blob:')) {
-      URL.revokeObjectURL(previewUrl);
-    }
-    setPreviewUrl(null);
-    setActiveFile(null);
+    previewUrls.forEach((url) => {
+      if (url && url.startsWith('blob:')) {
+        URL.revokeObjectURL(url);
+      }
+    });
+    setPreviewUrls([]);
+    setActiveFiles([]);
     reset();
   };
 
@@ -116,10 +117,10 @@ export const ScanPage: React.FC = () => {
         )}
 
         {/* Step 2: Pre-Flight Preview & Profile Selection */}
-        {state.status === 'READY' && activeFile && previewUrl && (
+        {state.status === 'READY' && activeFiles.length > 0 && (
           <ImagePreview
-            file={activeFile}
-            previewUrl={previewUrl}
+            files={activeFiles}
+            previewUrls={previewUrls}
             onConfirmAnalyze={handleConfirmAnalyze}
             onCancel={handleCancelPreview}
           />

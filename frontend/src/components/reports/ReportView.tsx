@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Card, CardFooter } from '@/components/ui/Card';
@@ -41,7 +42,129 @@ export const ReportView: React.FC<ReportViewProps> = ({ report, onClose }) => {
   }, [onClose]);
 
   const handlePrint = () => {
-    window.print();
+    // Scoped print: only renders the report content in an isolated iframe
+    const printContent = document.getElementById('report-print-area');
+    if (!printContent) { window.print(); return; }
+
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = 'none';
+    document.body.appendChild(iframe);
+
+    const iframeDoc = iframe.contentWindow?.document;
+    if (!iframeDoc) { window.print(); return; }
+
+    iframeDoc.open();
+    iframeDoc.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Compliance Report ${report.id}</title>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 12px; color: #0f172a; padding: 32px; }
+            h1 { font-size: 18px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+            .mono { font-family: 'Courier New', monospace; }
+            .label { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 2px; }
+            .value { font-weight: 600; }
+            .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px; }
+            .section { margin-top: 24px; }
+            .section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-bottom: 12px; }
+            .verdict-pass { color: #16a34a; font-weight: 700; font-size: 14px; }
+            .verdict-fail { color: #dc2626; font-weight: 700; font-size: 14px; }
+            .verdict-review { color: #d97706; font-weight: 700; font-size: 14px; }
+            .violation-box { border: 1px solid #fca5a5; background: #fff5f5; padding: 12px; border-radius: 6px; margin-bottom: 8px; }
+            .stats { display: flex; gap: 16px; margin-top: 12px; }
+            .stat-box { border: 1px solid #e2e8f0; padding: 8px 16px; border-radius: 6px; text-align: center; }
+            .stat-box .num { font-size: 20px; font-weight: 700; }
+            .stat-box .lbl { font-size: 9px; color: #64748b; }
+            .footer { margin-top: 32px; border-top: 2px solid #0f172a; padding-top: 16px; display: flex; justify-content: space-between; font-size: 10px; color: #64748b; }
+            @media print { body { padding: 16px; } }
+          </style>
+        </head>
+        <body>
+          <div style="display:flex;justify-content:space-between;align-items:start;border-bottom:2px solid #0f172a;padding-bottom:16px;margin-bottom:16px">
+            <div>
+              <h1>&#9679; Regulatory Compliance Report</h1>
+              <p class="mono" style="font-size:10px;color:#64748b">Backend-Supplied Statutory References &amp; Legal Metrology Assessment</p>
+            </div>
+            <div class="mono" style="text-align:right;font-size:10px">
+              <div>REPORT REF: <strong>${report.id}</strong></div>
+              <div>DATE: ${new Date(report.generatedAt).toLocaleString()}</div>
+              <div>AUTH: ${report.generatedBy}</div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Statutory Inspection Finding</div>
+            <div class="${ report.overallStatus === 'compliant' ? 'verdict-pass' : report.overallStatus === 'violation' ? 'verdict-fail' : 'verdict-review' }">
+              ${ report.overallStatus === 'compliant' ? '✅ COMPLIANT' : report.overallStatus === 'violation' ? '❌ VIOLATION' : '⚠️ REVIEW REQUIRED' }
+            </div>
+            <div class="stats">
+              <div class="stat-box"><div class="num">${report.totalChecks}</div><div class="lbl">Total Checks</div></div>
+              <div class="stat-box" style="border-color:#86efac"><div class="num" style="color:#16a34a">${report.passedChecks}</div><div class="lbl">Passed</div></div>
+              <div class="stat-box" style="border-color:#fca5a5"><div class="num" style="color:#dc2626">${report.failedChecks}</div><div class="lbl">Violations</div></div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Product Packaging Particulars</div>
+            <div class="grid">
+              <div><span class="label">Product Trade Name</span><span class="value">${report.productInfo.name}</span></div>
+              <div><span class="label">GTIN / Barcode</span><span class="value mono">${report.productInfo.gtin || 'N/A'}</span></div>
+              <div><span class="label">Manufacturer / Packer</span><span class="value">${report.productInfo.manufacturer || 'N/A'}</span></div>
+              <div><span class="label">Batch / Lot Reference</span><span class="value mono">${report.productInfo.batchNumber || 'N/A'}</span></div>
+              ${report.productInfo.mfgDate ? `<div><span class="label">MFG Date</span><span class="value">${report.productInfo.mfgDate}</span></div>` : ''}
+              ${report.productInfo.expDate ? `<div><span class="label">Expiry Date</span><span class="value">${report.productInfo.expDate}</span></div>` : ''}
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Executive Legal Summary</div>
+            <p>${report.summary}</p>
+          </div>
+
+          ${report.violations.length > 0 ? `
+          <div class="section">
+            <div class="section-title" style="color:#dc2626">Statutory Infractions &amp; Corrective Orders (${report.violations.length})</div>
+            ${report.violations.map((v: any, i: number) => `
+              <div class="violation-box">
+                <div style="display:flex;justify-content:space-between">
+                  <strong>${v.title || v.ruleName || `Infraction ${i+1}`}</strong>
+                  <span style="font-size:9px;font-weight:700;color:#dc2626">${(v.severity || '').toUpperCase()}</span>
+                </div>
+                <p style="font-size:11px;margin:4px 0">${v.description || v.detail || v.message || ''}</p>
+                <div class="mono" style="font-size:10px"><strong>Legal Clause:</strong> ${v.legalClause || v.legalReference || 'N/A'}</div>
+                <div style="background:#fff;border:1px solid #fecaca;padding:6px;border-radius:4px;font-size:10px;margin-top:6px">
+                  <strong>Prescribed Action:</strong> ${v.recommendedAction || v.recommendation || 'Rectification required'}
+                </div>
+              </div>
+            `).join('')}
+          </div>` : ''}
+
+          <div class="footer">
+            <div>
+              <div style="color:#16a34a;font-weight:600">&#10003; Verification Status: Authenticated &amp; Recorded</div>
+              <div>&#35; Cryptographic integrity verified</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-weight:700">Audit Authority Reference</div>
+              <div>${report.generatedBy}</div>
+              <div>Signature: ${report.digitalSignature?.slice(0, 32) || 'N/A'}...</div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `);
+    iframeDoc.close();
+
+    iframe.contentWindow?.focus();
+    iframe.contentWindow?.print();
+
+    setTimeout(() => { document.body.removeChild(iframe); }, 1000);
   };
 
   const handleCopyShareLink = () => {
@@ -62,9 +185,9 @@ export const ReportView: React.FC<ReportViewProps> = ({ report, onClose }) => {
     URL.revokeObjectURL(url);
   };
 
-  return (
+  const modalContent = (
     <div
-      className="fixed inset-0 z-50 overflow-y-auto p-4 sm:p-6 flex items-center justify-center"
+      className="fixed inset-0 z-[9999] overflow-y-auto p-4 sm:p-6 flex items-center justify-center"
       role="dialog"
       aria-modal="true"
       aria-label={`Regulatory Compliance Report ${report.id}`}
@@ -128,7 +251,7 @@ export const ReportView: React.FC<ReportViewProps> = ({ report, onClose }) => {
         </div>
 
         {/* Printable Regulatory Compliance Report Content */}
-        <div className="overflow-y-auto p-6 sm:p-8 space-y-6 print:p-0 print:overflow-visible">
+        <div id="report-print-area" className="overflow-y-auto p-6 sm:p-8 space-y-6 print:p-0 print:overflow-visible">
           {/* Statutory Reference Header */}
           <div className="border-b-2 border-slate-900 dark:border-slate-100 pb-6 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div className="space-y-1">
@@ -287,4 +410,6 @@ export const ReportView: React.FC<ReportViewProps> = ({ report, onClose }) => {
       </motion.div>
     </div>
   );
+
+  return ReactDOM.createPortal(modalContent, document.body);
 };

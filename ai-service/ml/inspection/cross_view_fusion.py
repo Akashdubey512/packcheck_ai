@@ -28,12 +28,12 @@ def fuse_cross_view_candidates(
             if raw_val and str(raw_val).strip() and status != "NOT_FOUND":
                 if field_name not in field_sources:
                     field_sources[field_name] = []
-                    field_sources[field_name].append({
-                        "view_type": view_type,
-                        "raw_value": raw_val,
-                        "normalized_value": norm_val,
-                        "confidence": f_data.get("extraction_confidence", 0.8)
-                    })
+                field_sources[field_name].append({
+                    "view_type": view_type,
+                    "raw_value": raw_val,
+                    "normalized_value": norm_val,
+                    "confidence": f_data.get("extraction_confidence", 0.8)
+                })
 
     unified_facts: Dict[str, CrossViewFact] = {}
 

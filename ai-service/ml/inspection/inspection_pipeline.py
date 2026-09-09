@@ -77,7 +77,7 @@ class MultiViewInspectionPipeline:
                 else:
                     bx_dict = {"x": 0, "y": 0, "width": 10, "height": 10}
                 r_dict["boundingBox"] = bx_dict
-            r_dict["id"] = f"reg_{r_dict.get('region_id', idx_r)}"
+            r_dict["id"] = f"reg_v{idx}_{r_dict.get('region_id', idx_r)}"
             r_dict["detectedText"] = r_dict.get("text", "")
             r_dict["confidence"] = r_dict.get("confidence", 0.9) or 0.9
             ocr_region_dicts.append(r_dict)
@@ -139,9 +139,14 @@ class MultiViewInspectionPipeline:
         coverage_info["views_analyzed"] = len(view_results)
         coverage_info["inspected_views"] = [v["view_type"] for v in view_results]
 
+        all_raw_texts = [v.get("full_raw_text", "") for v in view_results if v.get("full_raw_text")]
+        all_regions = []
+        for v in view_results:
+            all_regions.extend(v.get("ocr_regions", []))
+
         ocr_payload = {
-            "full_raw_text": view_results[0].get("full_raw_text", "") if view_results else "",
-            "regions": view_results[0].get("ocr_regions", []) if view_results else []
+            "full_raw_text": "\n\n".join(all_raw_texts) if all_raw_texts else "",
+            "regions": all_regions
         }
 
         return MultiViewInspectionResult(

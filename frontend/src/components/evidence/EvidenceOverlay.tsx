@@ -20,7 +20,7 @@ export const EvidenceOverlay: React.FC<EvidenceOverlayProps> = ({
 
   return (
     <div className="absolute inset-0 pointer-events-none z-10">
-      {regions.map((region) => {
+      {regions.map((region, idx) => {
         const isSelected = selectedRegionId === region.id;
         const matchingField = extractedFields.find((f) => f.ocrRegionId === region.id);
 
@@ -45,7 +45,7 @@ export const EvidenceOverlay: React.FC<EvidenceOverlayProps> = ({
 
         return (
           <div
-            key={region.id}
+            key={`${region.id || 'reg'}_${idx}`}
             onClick={(e) => {
               e.stopPropagation();
               onSelectRegion(region.id);
