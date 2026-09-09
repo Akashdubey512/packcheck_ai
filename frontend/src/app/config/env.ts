@@ -3,7 +3,7 @@ import { z } from 'zod';
 const envSchema = z.object({
   VITE_DEMO_MODE: z
     .string()
-    .default('true')
+    .default('false')
     .transform((val) => val === 'true' || val === '1'),
   VITE_API_BASE_URL: z.string().default('http://localhost:5000/api/v1'),
   VITE_APP_ENV: z.enum(['development', 'staging', 'production']).default('development'),
@@ -31,7 +31,7 @@ if (!parsed.success) {
 export const env = parsed.success
   ? parsed.data
   : {
-      VITE_DEMO_MODE: true,
+      VITE_DEMO_MODE: false,
       VITE_API_BASE_URL: 'http://localhost:5000/api/v1',
       VITE_APP_ENV: 'development' as const,
       VITE_API_TIMEOUT_MS: 60000,

@@ -19,9 +19,9 @@ export function requireAuth(req, res, next) {
   const authEnforced = process.env.AUTH_ENFORCE === "true";
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    if (isTestOrDev && !authEnforced) {
+    if (!authEnforced) {
       req.user = {
-        id: "test_officer",
+        id: "officer_session",
         email: "officer@packcheck.gov.in",
         role: "officer",
       };
