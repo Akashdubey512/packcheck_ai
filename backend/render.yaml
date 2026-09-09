@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: packcheck-backend
+    env: node
+    rootDir: .
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_ORIGIN
+        value: "*"
+      - key: MONGO_URI
+        sync: false
+      - key: AI_SERVICE_URL
+        value: "http://127.0.0.1:8000"
