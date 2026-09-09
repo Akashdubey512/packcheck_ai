@@ -107,6 +107,7 @@ class MultiViewInspectionResult:
     compliance_result: Dict[str, Any]
     views_analyzed: int
     execution_time_ms: float
+    ocr: Optional[Dict[str, Any]] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -117,5 +118,6 @@ class MultiViewInspectionResult:
             "contradictions": [c.to_dict() for c in self.contradictions],
             "compliance_result": self.compliance_result,
             "views_analyzed": self.views_analyzed,
-            "execution_time_ms": round(self.execution_time_ms, 2)
+            "execution_time_ms": round(self.execution_time_ms, 2),
+            "ocr": self.ocr or {}
         }

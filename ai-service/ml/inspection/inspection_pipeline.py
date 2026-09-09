@@ -57,13 +57,40 @@ class MultiViewInspectionPipeline:
         full_text = ocr_res.full_raw_text if hasattr(ocr_res, "full_raw_text") else ocr_res.get("full_raw_text", "")
         view_type = classify_package_view(full_text)
 
+        raw_regions = ocr_res.get("regions", []) if isinstance(ocr_res, dict) else getattr(ocr_res, "regions", [])
+        ocr_region_dicts = []
+        for idx_r, r in enumerate(raw_regions):
+            r_dict = r.to_dict() if hasattr(r, "to_dict") else dict(r)
+            bx = r_dict.get("bbox")
+            if bx:
+                if hasattr(bx, "x1"):
+                    bx_dict = {"x": bx.x1, "y": bx.y1, "width": max(1, bx.x2 - bx.x1), "height": max(1, bx.y2 - bx.y1)}
+                elif isinstance(bx, (list, tuple)) and len(bx) >= 4:
+                    bx_dict = {"x": bx[0], "y": bx[1], "width": max(1, bx[2] - bx[0]), "height": max(1, bx[3] - bx[1])}
+                elif isinstance(bx, dict):
+                    bx_dict = {
+                        "x": bx.get("x1", bx.get("x", 0)),
+                        "y": bx.get("y1", bx.get("y", 0)),
+                        "width": max(1, bx.get("width", bx.get("x2", 0) - bx.get("x1", 0))),
+                        "height": max(1, bx.get("height", bx.get("y2", 0) - bx.get("y1", 0)))
+                    }
+                else:
+                    bx_dict = {"x": 0, "y": 0, "width": 10, "height": 10}
+                r_dict["boundingBox"] = bx_dict
+            r_dict["id"] = f"reg_{r_dict.get('region_id', idx_r)}"
+            r_dict["detectedText"] = r_dict.get("text", "")
+            r_dict["confidence"] = r_dict.get("confidence", 0.9) or 0.9
+            ocr_region_dicts.append(r_dict)
+
         return {
             "view_id": f"view_{idx}",
             "image_id": f"{inspection_id}_view_{idx}",
             "view_type": view_type,
             "quality_status": prep_res["quality"]["status"] if prep_res["quality"] else "UNKNOWN",
             "extracted_fields": audited_facts.to_dict()["fields"],
-            "evidence_crops": audited_facts.evidence_manifest.to_dict()["crops"]
+            "evidence_crops": audited_facts.evidence_manifest.to_dict()["crops"],
+            "ocr_regions": ocr_region_dicts,
+            "full_raw_text": full_text
         }
 
     def inspect_images(
@@ -112,6 +139,11 @@ class MultiViewInspectionPipeline:
         coverage_info["views_analyzed"] = len(view_results)
         coverage_info["inspected_views"] = [v["view_type"] for v in view_results]
 
+        ocr_payload = {
+            "full_raw_text": view_results[0].get("full_raw_text", "") if view_results else "",
+            "regions": view_results[0].get("ocr_regions", []) if view_results else []
+        }
+
         return MultiViewInspectionResult(
             inspection_id=inspection_id,
             overall_status=overall_status,
@@ -120,22 +152,48 @@ class MultiViewInspectionPipeline:
             contradictions=contradictions,
             compliance_result=comp_dict,
             views_analyzed=len(view_results),
-            execution_time_ms=exec_time
+            execution_time_ms=exec_time,
+            ocr=ocr_payload
         )
 
     def _synthesize_audited_facts(self, inspection_id: str, view_results: List[Dict], unified_facts: Dict) -> Any:
         """Create a combined AuditedProductFacts structure for compliance rule evaluation."""
-        ext_facts = ProductFacts(product_id=inspection_id)
-        base_audited = self.conf_pipe.process(ext_facts, image_input=None, ocr_result=None)
+        from ml.compliance.types import FIELD_ALIAS_MAP
+        from ml.confidence.types import AuditedProductFacts, AuditedField, ConfidenceBreakdown, EvidenceManifest, InputProvenance
 
-        # Populate extracted values from unified facts
+        audited_fields: Dict[str, AuditedField] = {}
         for f_name, c_fact in unified_facts.items():
-            if f_name in base_audited.fields:
-                val = c_fact.consensus_value
-                base_audited.fields[f_name].raw_value = str(val) if val is not None else ""
-                base_audited.fields[f_name].raw_text = str(val) if val is not None else ""
-                if val:
-                    base_audited.fields[f_name].status = "CONFIDENT"
+            val = c_fact.consensus_value
+            conf = getattr(c_fact, "confidence", 0.85) or 0.85
+            if val is not None and str(val).strip():
+                # Primary canonical key
+                audited_fields[f_name] = AuditedField(
+                    field_name=f_name,
+                    raw_text=str(val),
+                    raw_value=str(val),
+                    status="CONFIDENT",
+                    confidence=ConfidenceBreakdown(candidate_score=conf, raw_composite_score=conf, calibrated_probability=conf),
+                    source_region_ids=[],
+                    source_bbox=None
+                )
+                # Mapped compliance alias
+                comp_alias = FIELD_ALIAS_MAP.get(f_name)
+                if comp_alias and comp_alias != f_name:
+                    audited_fields[comp_alias] = AuditedField(
+                        field_name=comp_alias,
+                        raw_text=str(val),
+                        raw_value=str(val),
+                        status="CONFIDENT",
+                        confidence=ConfidenceBreakdown(candidate_score=conf, raw_composite_score=conf, calibrated_probability=conf),
+                        source_region_ids=[],
+                        source_bbox=None
+                    )
 
-        return base_audited
+        return AuditedProductFacts(
+            product_id=inspection_id,
+            status="SUCCESS",
+            fields=audited_fields,
+            evidence_manifest=EvidenceManifest(manifest_id=f"manifest_{inspection_id}", product_id=inspection_id),
+            provenance=InputProvenance(input_sha256="UNAVAILABLE")
+        )
 

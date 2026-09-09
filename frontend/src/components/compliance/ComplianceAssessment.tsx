@@ -110,9 +110,7 @@ export const ComplianceAssessment: React.FC<ComplianceAssessmentProps> = ({
                 onFocusRegion={(box) => onFocusRegion(box, violation.ruleId)}
                 onViewTrace={(ruleId) => {
                   const matchingCheck = safeChecks.find((c) => c.ruleId === ruleId);
-                  if (matchingCheck?.decisionTraceId) {
-                    onViewTrace(matchingCheck.decisionTraceId);
-                  }
+                  onViewTrace(matchingCheck?.decisionTraceId || matchingCheck?.id || ruleId);
                 }}
               />
             ))}

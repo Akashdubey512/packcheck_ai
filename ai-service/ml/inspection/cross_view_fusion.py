@@ -23,12 +23,11 @@ def fuse_cross_view_candidates(
             if not isinstance(f_data, dict):
                 continue
             status = f_data.get("status")
-            if status in ("EXTRACTED", "CONFIDENT", "MULTIPLE_CANDIDATES"):
-                raw_val = f_data.get("raw_value") or f_data.get("raw_text")
-                norm_val = f_data.get("normalized_value")
-                if raw_val:
-                    if field_name not in field_sources:
-                        field_sources[field_name] = []
+            raw_val = f_data.get("raw_value") or f_data.get("raw_text")
+            norm_val = f_data.get("normalized_value")
+            if raw_val and str(raw_val).strip() and status != "NOT_FOUND":
+                if field_name not in field_sources:
+                    field_sources[field_name] = []
                     field_sources[field_name].append({
                         "view_type": view_type,
                         "raw_value": raw_val,

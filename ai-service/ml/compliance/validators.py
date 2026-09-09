@@ -87,6 +87,28 @@ class FieldValidators:
                         severity=rule.severity
                     )
 
+        # Fallback to direct raw_value / raw_text numeric validation
+        raw_str = str(audited_field.raw_value or audited_field.raw_text or "").strip()
+        num_m = re.search(r"(\d+(?:[.,]\d{1,2})?)", raw_str)
+        if num_m:
+            try:
+                amt = float(num_m.group(1).replace(",", "."))
+                if amt > 0:
+                    return FieldRuleOutcome(
+                        rule_id=rule.rule_id,
+                        field_name=rule.field,
+                        status=FieldValidationResult.PASS.value,
+                        reason_code="MRP_DECLARATION_VALID",
+                        explanation=f"Valid MRP declaration detected: ₹ {amt:.2f} (inclusive of taxes).",
+                        source_text=audited_field.raw_text,
+                        extracted_value=str(amt),
+                        normalized_value={"amount": amt, "currency": "INR"},
+                        evidence_region_ids=audited_field.source_region_ids,
+                        severity=rule.severity
+                    )
+            except (ValueError, TypeError):
+                pass
+
         return FieldRuleOutcome(
             rule_id=rule.rule_id,
             field_name=rule.field,
@@ -157,6 +179,25 @@ class FieldValidators:
                         evidence_region_ids=audited_field.source_region_ids,
                         severity=rule.severity
                     )
+
+        # Fallback to direct raw_value / raw_text parsing for net quantity
+        raw_qty_str = str(audited_field.raw_value or audited_field.raw_text or "").strip()
+        qty_m = re.search(r"(\d+(?:\.\d+)?)\s*(mg|g|gm|gms|kg|kilo|ml|l|ltr|liter|litre|pcs|n|units?)\b", raw_qty_str, re.IGNORECASE)
+        if qty_m:
+            num_val = qty_m.group(1)
+            u_val = qty_m.group(2)
+            return FieldRuleOutcome(
+                rule_id=rule.rule_id,
+                field_name=rule.field,
+                status=FieldValidationResult.PASS.value,
+                reason_code="NET_QUANTITY_VALID",
+                explanation=f"Valid Net Quantity declaration detected: {num_val} {u_val}.",
+                source_text=audited_field.raw_text,
+                extracted_value=f"{num_val} {u_val}",
+                normalized_value={"value": num_val, "unit": u_val},
+                evidence_region_ids=audited_field.source_region_ids,
+                severity=rule.severity
+            )
 
         return FieldRuleOutcome(
             rule_id=rule.rule_id,
@@ -236,6 +277,26 @@ class FieldValidators:
                     evidence_region_ids=audited_field.source_region_ids,
                     severity=rule.severity
                 )
+
+        # Fallback to direct raw_value / raw_text parsing for date or period
+        raw_date_str = str(audited_field.raw_value or audited_field.raw_text or "").strip()
+        date_m = re.search(r"(\d{1,2}[\/\.\-7]\d{1,2}[\/\.\-]\d{2,4}|\d{1,2}[\/\.\-]\d{2,4}|\d+\s*months?|\d+\s*days?(?:\s*of\s*opening)?)", raw_date_str, re.IGNORECASE)
+        if date_m:
+            raw_match = date_m.group(1)
+            # Only replace 7 if it acts as a delimiter between day/month or month/year e.g. 26703/2027
+            parsed_date_val = re.sub(r"(\d{2})7(\d{2})", r"\1/\2", raw_match).replace("-", "/")
+            return FieldRuleOutcome(
+                rule_id=rule.rule_id,
+                field_name=rule.field,
+                status=FieldValidationResult.PASS.value,
+                reason_code="DATE_DECLARATION_VALID",
+                explanation=f"Valid date declaration detected: {parsed_date_val}.",
+                source_text=audited_field.raw_text,
+                extracted_value=parsed_date_val,
+                normalized_value={"iso": parsed_date_val},
+                evidence_region_ids=audited_field.source_region_ids,
+                severity=rule.severity
+            )
 
         return FieldRuleOutcome(
             rule_id=rule.rule_id,

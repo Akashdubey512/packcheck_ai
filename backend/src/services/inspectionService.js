@@ -25,28 +25,43 @@ function buildCanonicalFields(aiResult) {
   ];
 
   const fieldKeyMap = {
-    mrp: "mrp",
-    netQuantity: "net_quantity",
-    manufactureDate: "mfg_date",
-    packingDate: "packing_date",
-    importDate: "import_date",
-    manufacturer: "manufacturer_name_address",
-    packer: "packer",
-    importer: "importer",
-    consumerCare: "consumer_care",
-    countryOfOrigin: "country_of_origin",
-    genericName: "generic_name",
-    unitSalePrice: "unit_sale_price",
-    bestBefore: "best_before",
-    expiryDate: "expiry_date",
+    mrp: ["mrp", "mrp_inclusive_of_taxes", "MRP"],
+    netQuantity: ["net_quantity", "netQuantity"],
+    manufactureDate: ["manufacturing_packing_date", "manufacture_or_packing_date", "mfg_date", "manufactureDate"],
+    packingDate: ["packing_date", "manufacturing_packing_date", "manufacture_or_packing_date", "packingDate"],
+    importDate: ["import_date", "importDate"],
+    manufacturer: ["manufacturer_name_and_address", "manufacturer_name_address", "manufacturer"],
+    packer: ["packer", "manufacturer_name_and_address", "manufacturer_name_address"],
+    importer: ["importer"],
+    consumerCare: ["consumer_care_details", "consumer_care_contact", "consumer_care", "consumerCare"],
+    countryOfOrigin: ["country_of_origin", "countryOfOrigin"],
+    genericName: ["common_generic_name", "generic_name", "genericName"],
+    unitSalePrice: ["unit_sale_price", "unitSalePrice"],
+    bestBefore: ["best_before_expiry", "expiry_or_use_by_date", "best_before", "bestBefore"],
+    expiryDate: ["best_before_expiry", "expiry_or_use_by_date", "expiry_date", "expiryDate"],
   };
 
   const fields = {};
   const unified = aiResult?.unified_facts || {};
 
   for (const sField of statutoryFields) {
-    const aiKey = fieldKeyMap[sField] || sField;
-    const fact = unified[aiKey] || unified[sField];
+    const candidateKeys = fieldKeyMap[sField] || [sField];
+    let fact = null;
+    for (const key of candidateKeys) {
+      if (unified[key]?.consensus_value) {
+        fact = unified[key];
+        break;
+      }
+      if (aiResult?.fields?.[key]?.rawValue) {
+        fact = {
+          consensus_value: aiResult.fields[key].rawValue,
+          confidence: aiResult.fields[key].confidence,
+          candidate_sources: aiResult.fields[key].evidence || [],
+        };
+        break;
+      }
+    }
+
     const val = fact?.consensus_value ?? null;
     const found = Boolean(val && String(val).trim());
     const conf = found ? Number(fact?.mean_confidence ?? fact?.confidence ?? 0.85) : 0.0;
@@ -118,8 +133,35 @@ export function formatInspectionForFrontend(inspection) {
     extractedFields,
     fields: doc.fields || {},
     complianceVerdict,
-    overallScore: Math.round((doc.provenance?.overallConfidence || 0.85) * 100),
-    compliance: doc.compliance || {},
+    overallScore: doc.compliance?.score ?? Math.round((doc.provenance?.overallConfidence || 0.85) * 100),
+    compliance: {
+      overallStatus: complianceVerdict,
+      score: doc.compliance?.score ?? 0,
+      ruleEvaluations: doc.compliance?.ruleEvaluations || [],
+      checks: (doc.compliance?.ruleEvaluations || []).map((r, idx) => ({
+        id: `chk_${idx}`,
+        ruleId: r.rule_id || `rule_${idx}`,
+        ruleName: r.rule_name || "Statutory Declaration",
+        ruleCategory: "statutory",
+        fieldReference: r.field_name,
+        passed: Boolean(r.passed),
+        status: r.passed ? "compliant" : "violation",
+        severity: (r.severity || "high").toLowerCase(),
+        message: r.message || (r.passed ? "Declaration compliant" : "Declaration missing or non-compliant"),
+        legalReference: r.legal_reference || "Legal Metrology (Packaged Commodities) Rules, 2011",
+        confidenceScore: 0.95,
+        decisionTraceId: `trc_${r.rule_id || idx}`,
+      })),
+      violations: (doc.compliance?.violations || []).map((v, idx) => ({
+        id: `viol_${idx}`,
+        ruleId: v.rule_id || `rule_${idx}`,
+        title: v.rule_name || "Statutory Violation",
+        description: v.message || "Mandatory statutory declaration non-compliant",
+        severity: (v.severity || "high").toLowerCase(),
+        legalClause: "Legal Metrology (Packaged Commodities) Rules, 2011",
+        recommendedAction: "Rectify the packaging to include the mandatory statutory declaration.",
+      })),
+    },
     contradictions: doc.contradictions || [],
     violations: doc.compliance?.violations || [],
     humanReview: doc.humanReview || [],
@@ -248,8 +290,18 @@ export class InspectionService {
           coverageStatus: aiResult.coverage?.coverage_status || "PARTIAL_COVERAGE",
         },
         ocr: {
-          fullRawText: "",
-          regions: [],
+          fullRawText: aiResult.ocr?.full_raw_text || "",
+          regions: (aiResult.ocr?.regions || []).map((r, idx) => ({
+            id: r.id || `reg_${idx}`,
+            boundingBox: {
+              x: r.boundingBox?.x ?? r.bbox?.[0] ?? 0,
+              y: r.boundingBox?.y ?? r.bbox?.[1] ?? 0,
+              width: r.boundingBox?.width ?? (r.bbox ? r.bbox[2] - r.bbox[0] : 10),
+              height: r.boundingBox?.height ?? (r.bbox ? r.bbox[3] - r.bbox[1] : 10),
+            },
+            confidence: r.confidence || 0.9,
+            detectedText: r.detectedText || r.text || "",
+          })),
         },
         fields,
         regulatoryDeclarations: aiResult.unified_facts || {},

@@ -17,7 +17,7 @@ FIELD_PATTERNS = {
             r"inclusive of all taxes", r"एमआरपी", r"अधिकतम खुदरा मूल्य", r"मूल्य"
         ],
         "regexes": [
-            r"(?:m\.?r\.?p\.?|max\.?\s*retail\s*price|price)\s*[:\-]?\s*(?:₹|rs\.?|inr)?\s*(\d+(?:[.,]\d{1,2})?)",
+            r"(?:m\.?r\.?p\.?|max\.?\s*retail\s*price|price)\s*[:\-#]?\s*(?:₹|rs\.?|inr)?\s*(\d+(?:[.,]\d{1,2})?)",
             r"(?:₹|rs\.?|inr)\s*(\d+(?:[.,]\d{1,2})?)\s*(?:incl|mrp|inclusive)?",
             r"(\d+(?:[.,]\d{2}))\s*(?:incl\.?\s*of\s*all\s*taxes)"
         ]
@@ -34,12 +34,12 @@ FIELD_PATTERNS = {
     },
     "manufacturing_packing_date": {
         "keywords": [
-            r"mfg\.?", r"mfd\.?", r"mfg\s*date", r"manufactured", r"manufacturing", r"pkd\.?", r"packed",
-            r"packing\s*date", r"date\s*of\s*mfg", r"date\s*of\s*packing", r"पैकिंग\s*तिथि", r"उत्पादन\s*तिथि"
+            r"mfg\.?", r"mfd\.?", r"mfg\s*date", r"date\s*of\s*mfg", r"date\s*of\s*packing",
+            r"pkd\.?", r"packed", r"packing\s*date", r"पैकिंग\s*तिथि", r"उत्पादन\s*तिथि"
         ],
         "regexes": [
-            r"(?:mfg|mfd|pkd|packed|manufactured)\.?\s*[:\-]?\s*(\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4}|\d{1,2}[\/\.\-]\d{2,4}|[a-zA-Z]{3,9}\s*\d{2,4}|\d{1,2}\s*[a-zA-Z]{3,9}\s*\d{2,4})",
-            r"(\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4}|\d{1,2}[\/\.\-]\d{2,4})"
+            r"(?:mfg|mfd|pkd|packed|date\s*of\s*mfg)\.?\s*(?:date)?\s*[:\-]?\s*(\d{1,2}[\/\.\-7]\d{1,2}[\/\.\-]\d{2,4}|\d{1,2}[\/\.\-]\d{2,4}|[a-zA-Z]{3,9}\s*\d{2,4}|\d{1,2}\s*[a-zA-Z]{3,9}\s*\d{2,4})",
+            r"(\d{1,2}[\/\.\-7]\d{1,2}[\/\.\-]\d{2,4}|\d{1,2}[\/\.\-]\d{2,4})"
         ]
     },
     "best_before_expiry": {
@@ -48,7 +48,8 @@ FIELD_PATTERNS = {
             r"best\s*use\s*before", r"उपयोग\s*अवधि", r"समाप्ति\s*तिथि"
         ],
         "regexes": [
-            r"(?:exp|expiry|use\s*by|best\s*before)\.?\s*[:\-]?\s*(\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4}|\d{1,2}[\/\.\-]\d{2,4}|\d+\s*months?|\d+\s*years?|[a-zA-Z]{3,9}\s*\d{2,4})",
+            r"(?:exp|expiry|use\s*by|best\s*before)\.?\s*(?:date)?\s*[:\-]?\s*(\d{1,2}[\/\.\-7]\d{1,2}[\/\.\-]\d{2,4}|\d{1,2}[\/\.\-]\d{2,4}|\d+\s*months?|\d+\s*years?|[a-zA-Z]{3,9}\s*\d{2,4})",
+            r"(?:use\s*within|consume\s*within)\s*(\d+\s*days?(?:\s*of\s*opening)?)",
             r"(\d+\s*months?\s*(?:from|of)?\s*(?:mfg|pkd|packing|manufacture)?)"
         ]
     },
@@ -58,8 +59,8 @@ FIELD_PATTERNS = {
             r"मूल\s*देश", r"निर्मित"
         ],
         "regexes": [
-            r"(?:country\s*of\s*origin|made\s*in|product\s*of|origin)\s*[:\-]?\s*([a-zA-Z\s]{2,20})",
-            r"(made\s*in\s*india|product\s*of\s*india)"
+            r"(?:country\s*of\s*origin|made\s*in|product\s*of|origin)\s*[:\-]?\s*([a-zA-Z\s]{2,30})",
+            r"(made\s*in\s*[a-zA-Z]+|product\s*of\s*(?:inchedible\s*)?[a-zA-Z]+)"
         ]
     },
     "consumer_care_details": {
@@ -68,9 +69,10 @@ FIELD_PATTERNS = {
             r"feedback", r"queries", r"complaints", r"email", r"care@", r"ग्राहक\s*सेवा"
         ],
         "regexes": [
-            r"(?:1800[\-\s]?\d{3}[\-\s]?\d{4}|\+?91[\-\s]?\d{10})",
-            r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}",
-            r"(?:customer|consumer)\s*care\s*[:\-]?\s*([^\n\r]+)"
+            r"(?:customer|consumer)\s*care\s*[:\-]?\s*([^\n\r]+)",
+            r"(?:feedback|complaints|call\s*us\s*at|reach\s*out)\s*[:\-]?\s*([^\n\r]+)",
+            r"(?:1800[\-\s]?\d{3}[\-\s]?\d{4}|\+?91[\-\s]?\d{10}|\b\d{5}\s*\d{5}\b)",
+            r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
         ]
     },
     "manufacturer_name_and_address": {
@@ -85,10 +87,13 @@ FIELD_PATTERNS = {
     "common_generic_name": {
         "keywords": [
             r"generic\s*name", r"common\s*name", r"commodity", r"product\s*name", r"item",
+            r"proprietary\s*food", r"cereal", r"breakfast\s*cereal",
             r"सामान्य\s*नाम"
         ],
         "regexes": [
-            r"(?:generic\s*name|common\s*name|commodity)\s*[:\-]?\s*([^\n\r]+)"
+            r"(?:generic\s*name|common\s*name|commodity)\s*[:\-]?\s*([^\n\r]+)",
+            r"proprietary\s*food(?:\s*category)?(?:\s*[\d.]+)?\s*([a-zA-Z\s]{3,30})",
+            r"\b(breakfast\s*cereal|rolled\s*oats|peanut\s*butter|muesli|corn\s*flakes|namkeen|biscuit)\b"
         ]
     },
     "unit_sale_price": {
@@ -142,41 +147,48 @@ class CandidateGenerator:
                 continue
 
             for field_name in CANONICAL_FIELD_NAMES:
+                has_field_kw = any(kw.search(text) for kw in self.compiled_keywords[field_name])
+
                 # Regex match
                 for rgx in self.compiled_regexes[field_name]:
                     for match in rgx.finditer(text):
                         raw_val = match.group(1) if match.lastindex else match.group(0)
+                        raw_val_clean = raw_val.strip()
+                        if not raw_val_clean:
+                            continue
+
                         cand_id = f"cand_{field_name}_{region_id}_{len(candidates_by_field[field_name])}"
-                        
+                        # If region has both the explicit keyword and the matching regex value, it's highest confidence
+                        score = 0.96 if has_field_kw else 0.88
+
                         candidate = FieldCandidate(
                             candidate_id=cand_id,
                             field_name=field_name,
                             raw_text=text,
-                            raw_value=raw_val.strip(),
+                            raw_value=raw_val_clean,
                             source_region_ids=[region_id],
                             source_bbox=bbox,
-                            score=0.85,
-                            evidence_types=["regex_match"]
+                            score=score,
+                            evidence_types=["regex_match"] if not has_field_kw else ["intra_region_keyword_regex"]
                         )
                         candidates_by_field[field_name].append(candidate)
 
-                # Keyword match within region
-                for kw_rgx in self.compiled_keywords[field_name]:
-                    if kw_rgx.search(text):
-                        cand_id = f"cand_kw_{field_name}_{region_id}_{len(candidates_by_field[field_name])}"
-                        candidate = FieldCandidate(
-                            candidate_id=cand_id,
-                            field_name=field_name,
-                            raw_text=text,
-                            raw_value=text,
-                            source_region_ids=[region_id],
-                            source_bbox=bbox,
-                            score=0.70,
-                            evidence_types=["keyword_match"]
-                        )
-                        candidates_by_field[field_name].append(candidate)
+                # Standalone keyword match within region (lower confidence)
+                if has_field_kw and not any(c.candidate_id.startswith(f"cand_{field_name}_{region_id}") for c in candidates_by_field[field_name]):
+                    cand_id = f"cand_kw_{field_name}_{region_id}_{len(candidates_by_field[field_name])}"
+                    candidate = FieldCandidate(
+                        candidate_id=cand_id,
+                        field_name=field_name,
+                        raw_text=text,
+                        raw_value=text,
+                        source_region_ids=[region_id],
+                        source_bbox=bbox,
+                        score=0.50,
+                        evidence_types=["keyword_match"]
+                    )
+                    candidates_by_field[field_name].append(candidate)
 
-        # 2. Spatial Adjacent Region Pairing (e.g. Label region paired with Value region)
+        # 2. Spatial Adjacent Region Pairing (Label region paired with validated Value region)
         paired_candidates = self._generate_paired_candidates(regions)
         for field_name, paired_cands in paired_candidates.items():
             candidates_by_field[field_name].extend(paired_cands)
@@ -217,6 +229,11 @@ class CandidateGenerator:
                     if not t2:
                         continue
 
+                    # Validate that t2 actually looks like a valid value for field_name
+                    val_candidate = self._validate_and_extract_value(field_name, t2)
+                    if not val_candidate:
+                        continue
+
                     # Check spatial proximity if bboxes are available
                     is_adjacent = self._are_regions_adjacent(bbox1, bbox2)
                     if is_adjacent:
@@ -237,15 +254,42 @@ class CandidateGenerator:
                             candidate_id=cand_id,
                             field_name=field_name,
                             raw_text=combined_text,
-                            raw_value=t2,
+                            raw_value=val_candidate,
                             source_region_ids=[r1_id, r2_id],
                             source_bbox=merged_bbox,
-                            score=0.90,
+                            score=0.92,
                             evidence_types=["spatial_keyword_pair"]
                         )
                         paired[field_name].append(candidate)
 
         return paired
+
+    def _validate_and_extract_value(self, field_name: str, text: str) -> Optional[str]:
+        """Validate if adjacent text actually satisfies field pattern expectations."""
+        clean_text = text.strip()
+        if not clean_text:
+            return None
+
+        # Try matching any compiled regex for the field
+        for rgx in self.compiled_regexes[field_name]:
+            m = rgx.search(clean_text)
+            if m:
+                return (m.group(1) if m.lastindex else m.group(0)).strip()
+
+        # Specific heuristics for structured text fields
+        if field_name == "manufacturer_name_and_address":
+            # Must not be a pure number, pure date, or statutory label
+            if len(clean_text) >= 4 and not re.match(r"^[\d\s\W]+$", clean_text):
+                if not re.search(r"^(?:mrp|batch|mfg|use by|exp|net weight)", clean_text, re.IGNORECASE):
+                    return clean_text
+        elif field_name == "country_of_origin":
+            if re.search(r"\b(india|bharat|china|usa|uk|germany|japan)\b", clean_text, re.IGNORECASE):
+                return clean_text
+        elif field_name == "consumer_care_details":
+            if re.search(r"(@|\d{5,}|\.com|\.in|feedback|support)", clean_text, re.IGNORECASE):
+                return clean_text
+
+        return None
 
     @staticmethod
     def _are_regions_adjacent(bbox1: Optional[List[int]], bbox2: Optional[List[int]]) -> bool:

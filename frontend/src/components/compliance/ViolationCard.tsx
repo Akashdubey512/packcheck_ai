@@ -83,7 +83,7 @@ export const ViolationCard: React.FC<ViolationCardProps> = ({
           size="sm"
           variant="primary"
           className="text-xs"
-          onClick={() => onFocusRegion && onFocusRegion(violation.boundingBox)}
+          onClick={() => onFocusRegion && onFocusRegion(violation.boundingBox, violation.ruleId)}
         >
           <Target size={13} className="mr-1" /> Focus Evidence on Label
         </Button>

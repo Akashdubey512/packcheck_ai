@@ -66,11 +66,11 @@ class FieldClassifier:
                 else:
                     distinct_cand_values.add(c.raw_value.lower().strip())
 
-        if len(distinct_cand_values) > 1 and len(ranked_candidates) >= 2 and ranked_candidates[1].score >= 0.6:
+        if len(distinct_cand_values) > 1 and len(ranked_candidates) >= 2 and ranked_candidates[1].score >= 0.80 and abs(top_score - ranked_candidates[1].score) < 0.10:
             status = FieldStatus.MULTIPLE_CANDIDATES.value
-        elif top_score >= 0.70:
+        elif top_score >= 0.65:
             status = FieldStatus.EXTRACTED.value
-        elif top_score >= 0.40:
+        elif top_score >= 0.35:
             status = FieldStatus.LOW_CONFIDENCE.value
         else:
             status = FieldStatus.REVIEW_REQUIRED.value

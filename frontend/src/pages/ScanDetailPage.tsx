@@ -86,23 +86,56 @@ export const ScanDetailPage: React.FC = () => {
   // Central interaction: Focusing on a bounding box from check or violation
   const handleFocusRegion = useCallback(
     (box?: BoundingBox, fieldRef?: string) => {
-      if (!box || !scan) return;
+      if (!scan) return;
 
-      // 1. Set focused coordinates for EvidenceViewer camera
-      setFocusedBoundingBox(box);
-
-      // 2. Find matching OCR region
       const safeRegions = Array.isArray(scan.ocrRegions) ? scan.ocrRegions : [];
-      const matchingRegion = safeRegions.find(
-        (r) =>
-          Math.abs(r.boundingBox.x - box.x) < 2 && Math.abs(r.boundingBox.y - box.y) < 2
-      );
-      if (matchingRegion) {
-        setSelectedRegionId(matchingRegion.id);
+      const safeFields = Array.isArray(scan.extractedFields) ? scan.extractedFields : [];
+
+      let targetBox = box;
+
+      // 1. If box not explicitly given, try resolving from matching check or fieldRef
+      if (!targetBox && fieldRef) {
+        const matchingCheck = complianceResult?.checks?.find(
+          (c) => c.fieldReference === fieldRef || c.ruleId === fieldRef
+        );
+        const resolvedFieldRef = matchingCheck?.fieldReference || fieldRef;
+
+        const fieldMatch = safeFields.find(
+          (f) => f.fieldName.toLowerCase() === resolvedFieldRef.toLowerCase()
+        );
+        if (fieldMatch?.ocrRegionId) {
+          const r = safeRegions.find((reg) => reg.id === fieldMatch.ocrRegionId);
+          if (r) {
+            targetBox = r.boundingBox;
+            setSelectedRegionId(r.id);
+          }
+        }
+
+        if (!targetBox) {
+          const keywordMatch = safeRegions.find((r) =>
+            r.detectedText.toLowerCase().includes(resolvedFieldRef.toLowerCase().replace(/_/g, ' '))
+          );
+          if (keywordMatch) {
+            targetBox = keywordMatch.boundingBox;
+            setSelectedRegionId(keywordMatch.id);
+          }
+        }
+      }
+
+      // 2. Set focused coordinates for EvidenceViewer camera
+      if (targetBox) {
+        setFocusedBoundingBox(targetBox);
+        const matchingRegion = safeRegions.find(
+          (r) =>
+            Math.abs(r.boundingBox.x - targetBox!.x) < 4 && Math.abs(r.boundingBox.y - targetBox!.y) < 4
+        );
+        if (matchingRegion) {
+          setSelectedRegionId(matchingRegion.id);
+        }
       }
 
       // 3. Find matching check
-      if (complianceResult) {
+      if (complianceResult && fieldRef) {
         const matchingCheck = complianceResult.checks.find(
           (c) => c.fieldReference === fieldRef || c.ruleId === fieldRef
         );
@@ -110,6 +143,9 @@ export const ScanDetailPage: React.FC = () => {
           setSelectedCheckId(matchingCheck.id);
         }
       }
+
+      // 4. Switch tab to Evidence Telemetry
+      setActiveTab('evidence');
     },
     [scan, complianceResult]
   );
@@ -131,6 +167,12 @@ export const ScanDetailPage: React.FC = () => {
         // Fallback: Dynamically synthesize a deterministic trace from the check data
         if (check) {
           const isPassed = check.status === 'compliant';
+          const safeExtFields = Array.isArray(scan?.extractedFields) ? scan!.extractedFields : [];
+          const matchedField = safeExtFields.find(
+            (f) => f.fieldName.toLowerCase() === (check.fieldReference || '').toLowerCase()
+          );
+          const rawVal = matchedField?.rawValue || (check as any).rawValue || '';
+
           setActiveTrace({
             id: traceId || `trc_${check.id}`,
             scanId: id,
@@ -140,7 +182,9 @@ export const ScanDetailPage: React.FC = () => {
               {
                 condition: `Statutory presence of "${check.ruleName}" under Legal Metrology Rules`,
                 expected: 'PRESENT & LEGIBLE',
-                actual: isPassed ? 'CONFIRMED' : 'OMITTED / NOT DETECTED',
+                actual: isPassed
+                  ? (rawVal ? `EXTRACTED: "${rawVal}"` : 'CONFIRMED ON PACKAGING')
+                  : (check.message || 'OMITTED / NOT DETECTED'),
                 passed: isPassed,
               },
               {
@@ -158,6 +202,7 @@ export const ScanDetailPage: React.FC = () => {
             ],
             inputs: {
               field: check.fieldReference || check.ruleId,
+              extractedValue: rawVal || 'NOT FOUND',
               confidence: check.confidenceScore,
               category: check.ruleCategory,
             },

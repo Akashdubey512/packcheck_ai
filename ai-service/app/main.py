@@ -127,8 +127,32 @@ async def inspect_packages(
             "expiry_date": ["expiry_date", "expiryDate"]
         }
 
+        field_lookups = {
+            "mrp": ["mrp", "mrp_inclusive_of_taxes"],
+            "net_quantity": ["net_quantity"],
+            "mfg_date": ["manufacturing_packing_date", "manufacture_or_packing_date", "mfg_date"],
+            "packing_date": ["packing_date", "manufacturing_packing_date", "manufacture_or_packing_date"],
+            "import_date": ["import_date"],
+            "manufacturer_name_address": ["manufacturer_name_and_address", "manufacturer_name_address", "manufacturer"],
+            "packer": ["packer", "manufacturer_name_and_address", "manufacturer_name_address"],
+            "importer": ["importer"],
+            "consumer_care": ["consumer_care_details", "consumer_care_contact", "consumer_care"],
+            "country_of_origin": ["country_of_origin"],
+            "generic_name": ["common_generic_name", "generic_name"],
+            "unit_sale_price": ["unit_sale_price"],
+            "best_before": ["best_before_expiry", "expiry_or_use_by_date", "best_before"],
+            "expiry_date": ["best_before_expiry", "expiry_or_use_by_date", "expiry_date"]
+        }
+
         for base_key, aliases in field_mapping.items():
-            fact_item = res_dict.get("unified_facts", {}).get(base_key, {})
+            lookups = field_lookups.get(base_key, [base_key])
+            fact_item = {}
+            for lk in lookups:
+                cand_fact = res_dict.get("unified_facts", {}).get(lk)
+                if cand_fact and cand_fact.get("consensus_value"):
+                    fact_item = cand_fact
+                    break
+
             val = fact_item.get("consensus_value") if isinstance(fact_item, dict) else None
             conf = float(fact_item.get("mean_confidence", fact_item.get("confidence", 0.0))) if isinstance(fact_item, dict) else 0.0
             status_val = "CONFIDENT" if val and conf >= 0.70 else ("UNCERTAIN" if val else "MISSING")
