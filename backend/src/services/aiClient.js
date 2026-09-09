@@ -2,7 +2,11 @@ import axios from "axios";
 import FormData from "form-data";
 import fs from "fs";
 
-const AI_URL = (process.env.AI_SERVICE_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
+let rawAiUrl = (process.env.AI_SERVICE_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
+if (!rawAiUrl.startsWith("http://") && !rawAiUrl.startsWith("https://")) {
+  rawAiUrl = `http://${rawAiUrl}:8000`;
+}
+const AI_URL = rawAiUrl;
 const TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS) || 60000;
 
 export class AIServiceError extends Error {

@@ -19,4 +19,26 @@ services:
       - key: MONGO_URI
         sync: false
       - key: AI_SERVICE_URL
-        value: "http://127.0.0.1:8000"
+        fromService:
+          type: web
+          name: packcheck-ai-service
+          property: host
+
+  - type: web
+    name: packcheck-ai-service
+    env: docker
+    rootDir: ai-service
+    dockerfilePath: Dockerfile
+    plan: free
+    healthCheckPath: /ready
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: HOST
+        value: 0.0.0.0
+      - key: UVICORN_WORKERS
+        value: "1"
+      - key: OMP_NUM_THREADS
+        value: "1"
+      - key: ONNXRUNTIME_NUM_THREADS
+        value: "1"
