@@ -22,32 +22,35 @@ type FilterTab = 'all' | 'violation' | 'review' | 'compliant';
 export const ComplianceAssessment: React.FC<ComplianceAssessmentProps> = ({
   overallStatus,
   score,
-  checks,
-  violations,
+  checks = [],
+  violations = [],
   selectedCheckId,
   onSelectCheck,
   onFocusRegion,
   onViewTrace,
 }) => {
+  const safeScore = typeof score === 'number' && isFinite(score) ? score : 0;
+  const safeChecks = Array.isArray(checks) ? checks : [];
+  const safeViolations = Array.isArray(violations) ? violations : [];
   const [activeTab, setActiveTab] = useState<FilterTab>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Counts
-  const violationCount = checks.filter((c) => c.status === 'violation').length;
-  const reviewCount = checks.filter((c) => c.status === 'review').length;
-  const compliantCount = checks.filter((c) => c.status === 'compliant').length;
+  const violationCount = safeChecks.filter((c) => c.status === 'violation').length;
+  const reviewCount = safeChecks.filter((c) => c.status === 'review').length;
+  const compliantCount = safeChecks.filter((c) => c.status === 'compliant').length;
 
   const filteredChecks = useMemo(() => {
-    return checks.filter((check) => {
+    return safeChecks.filter((check) => {
       const matchesTab = activeTab === 'all' || check.status === activeTab;
       const matchesSearch =
         !searchQuery.trim() ||
-        check.ruleName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        check.legalReference.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        check.ruleCategory.toLowerCase().includes(searchQuery.toLowerCase());
+        (check.ruleName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (check.legalReference || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (check.ruleCategory || '').toLowerCase().includes(searchQuery.toLowerCase());
       return matchesTab && matchesSearch;
     });
-  }, [checks, activeTab, searchQuery]);
+  }, [safeChecks, activeTab, searchQuery]);
 
   return (
     <div className="space-y-4">
@@ -62,7 +65,7 @@ export const ComplianceAssessment: React.FC<ComplianceAssessmentProps> = ({
               <div className="flex items-center gap-3 mt-1">
                 <StatusBadge status={overallStatus} size="lg" />
                 <div className="font-mono text-xl font-bold text-foreground">
-                  Score: <span className={overallStatus === 'violation' ? 'text-violation' : 'text-compliant'}>{score.toFixed(1)}/100</span>
+                  Score: <span className={overallStatus === 'violation' ? 'text-violation' : 'text-compliant'}>{safeScore.toFixed(1)}/100</span>
                 </div>
               </div>
             </div>
@@ -90,23 +93,23 @@ export const ComplianceAssessment: React.FC<ComplianceAssessmentProps> = ({
       </Card>
 
       {/* Critical Violations Alert Section (if any violations exist) */}
-      {violations.length > 0 && (
+      {safeViolations.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <AlertOctagon size={15} className="text-violation" />
             <h3 className="text-xs font-bold uppercase tracking-wider text-foreground">
-              Statutory Infractions Detected ({violations.length})
+              Statutory Infractions Detected ({safeViolations.length})
             </h3>
           </div>
 
           <div className="space-y-3">
-            {violations.map((violation) => (
+            {safeViolations.map((violation) => (
               <ViolationCard
                 key={violation.id}
                 violation={violation}
                 onFocusRegion={(box) => onFocusRegion(box, violation.ruleId)}
                 onViewTrace={(ruleId) => {
-                  const matchingCheck = checks.find((c) => c.ruleId === ruleId);
+                  const matchingCheck = safeChecks.find((c) => c.ruleId === ruleId);
                   if (matchingCheck?.decisionTraceId) {
                     onViewTrace(matchingCheck.decisionTraceId);
                   }
@@ -122,7 +125,7 @@ export const ComplianceAssessment: React.FC<ComplianceAssessmentProps> = ({
         <CardHeader className="pb-3 border-b border-border">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <CardTitle className="text-xs uppercase tracking-wider">
-              Statutory Declarations Checklist ({checks.length})
+              Statutory Declarations Checklist ({safeChecks.length})
             </CardTitle>
 
             <div className="relative sm:w-64">
@@ -148,7 +151,7 @@ export const ComplianceAssessment: React.FC<ComplianceAssessmentProps> = ({
                   : 'bg-surface text-slate-600 dark:text-slate-400 border-border hover:bg-surface-muted'
               }`}
             >
-              All ({checks.length})
+              All ({safeChecks.length})
             </button>
             <button
               type="button"

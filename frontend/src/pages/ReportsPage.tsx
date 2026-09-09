@@ -23,11 +23,12 @@ export const ReportsPage: React.FC = () => {
     setError(null);
     ReportService.getReports()
       .then((data) => {
-        setReports(data);
+        const safeData = Array.isArray(data) ? data : [];
+        setReports(safeData);
         // Check if query param requests a specific report (e.g. ?id=rep_2026_001)
         const targetId = searchParams.get('id');
         if (targetId) {
-          const match = data.find((r) => r.id === targetId);
+          const match = safeData.find((r) => r.id === targetId);
           if (match) setSelectedReport(match);
         }
       })

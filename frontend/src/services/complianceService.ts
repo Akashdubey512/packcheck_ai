@@ -196,7 +196,109 @@ export const ComplianceService = {
       };
     }
 
-    return apiClient.get<ComplianceCheckResult>(API_ENDPOINTS.COMPLIANCE.CHECK(scanId));
+    // Try dedicated compliance endpoint first; fall back to extracting from inspection record
+    try {
+      const res = await apiClient.get<any>(API_ENDPOINTS.COMPLIANCE.CHECK(scanId));
+      const data = res.data || res;
+      return this.normalizeComplianceResult(scanId, data);
+    } catch {
+      // Compliance endpoint not available — extract from inspection record
+      try {
+        const res = await apiClient.get<any>(API_ENDPOINTS.SCAN.GET_BY_ID(scanId));
+        const data = res.data || res;
+        return this.normalizeComplianceResult(scanId, data);
+      } catch {
+        // Last resort: return a minimal valid compliance result
+        return {
+          scanId,
+          overallStatus: 'review',
+          score: 0,
+          checks: [],
+          violations: [],
+        };
+      }
+    }
+  },
+
+  normalizeComplianceResult(scanId: string, data: any): ComplianceCheckResult {
+    const result = data.result || data;
+    const rawViolations = Array.isArray(result.violations) ? result.violations : [];
+    const rawChecks = Array.isArray(result.checks)
+      ? result.checks
+      : Array.isArray(result.rules)
+      ? result.rules
+      : [];
+
+    const violations: Violation[] = rawViolations.map((v: any, idx: number) => ({
+      id: v.id || `viol_${idx}`,
+      ruleId: v.ruleId || v.rule || `rule_${idx}`,
+      title: v.title || v.rule || v.description || 'Compliance Violation Detected',
+      description: v.description || v.message || 'A statutory violation was detected.',
+      severity: v.severity || 'high',
+      status: 'violation' as const,
+      boundingBox: v.boundingBox || v.bbox,
+      legalClause: v.legalClause || v.reference || '',
+      recommendedAction: v.recommendedAction || v.recommendation || '',
+      timestamp: v.timestamp || new Date().toISOString(),
+    }));
+
+    const checks: ComplianceCheck[] = rawChecks.map((c: any, idx: number) => {
+      const s = (c.status || '').toString().toLowerCase();
+      const isCompliant = s === 'pass' || s === 'compliant' || c.passed === true;
+      const isViolation = s === 'fail' || s === 'violation' || s === 'missing' || s === 'invalid_format' || s === 'invalid_value' || c.passed === false;
+
+      return {
+        id: c.id || `chk_${idx}`,
+        ruleId: c.ruleId || c.rule || `rule_${idx}`,
+        ruleName: c.ruleName || c.name || c.rule || 'Compliance Check',
+        ruleCategory: c.ruleCategory || c.category || 'statutory',
+        status: isCompliant ? 'compliant' : isViolation ? 'violation' : 'review',
+        severity: c.severity || 'medium',
+        message: c.message || c.detail || '',
+        legalReference: c.legalReference || c.reference || '',
+        confidenceScore: c.confidenceScore ?? c.confidence ?? 1,
+        decisionTraceId: c.decisionTraceId || c.traceId,
+        fieldReference: c.fieldReference || c.field,
+      };
+    });
+
+    const score = (() => {
+      // Prioritize computing directly from checks (guarantees consistency with displayed checklist)
+      if (checks.length > 0) {
+        const compliantCount = checks.filter((c) => c.status === 'compliant').length;
+        return Math.round((compliantCount / checks.length) * 100);
+      }
+      // Fallback: derive from violations count
+      if (violations.length > 0) return Math.max(0, 100 - violations.length * 12);
+      if (typeof result.score === 'number') return result.score;
+      if (typeof data.score === 'number') return data.score;
+      return typeof data.overallScore === 'number' ? data.overallScore : 100;
+    })();
+
+    // Derive violations from checks that failed, if violations list is empty
+    const effectiveViolations: typeof violations = violations.length > 0
+      ? violations
+      : checks
+          .filter((c) => c.status === 'violation')
+          .map((c) => ({
+            id: `viol_${c.id}`,
+            ruleId: c.ruleId,
+            title: c.ruleName,
+            description: c.message || `Mandatory statutory declaration non-compliant: ${c.ruleName}`,
+            severity: c.severity as 'critical' | 'high' | 'medium' | 'low',
+            status: 'violation' as const,
+            legalClause: c.legalReference,
+            recommendedAction: 'Rectify the packaging to include the mandatory statutory declaration.',
+            timestamp: new Date().toISOString(),
+          }));
+
+    const hasViolations = effectiveViolations.length > 0 || checks.some((c) => c.status === 'violation');
+    const overallStatus: ComplianceCheckResult['overallStatus'] =
+      hasViolations ? 'violation'
+      : checks.some((c) => c.status === 'review') ? 'review'
+      : 'compliant';
+
+    return { scanId, overallStatus, score, checks, violations: effectiveViolations };
   },
 
   async getDecisionTrace(traceId: string): Promise<DecisionTrace> {
@@ -344,3 +446,4 @@ export const ComplianceService = {
     return apiClient.get<DecisionTrace>(API_ENDPOINTS.COMPLIANCE.DECISION_TRACE(traceId));
   },
 };
+

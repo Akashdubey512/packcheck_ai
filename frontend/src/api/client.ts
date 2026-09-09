@@ -8,13 +8,20 @@ export interface RequestOptions extends RequestInit {
 export class ApiError extends Error {
   public status: number;
   public data?: unknown;
+  public requestId?: string;
 
-  constructor(message: string, status: number, data?: unknown) {
+  constructor(message: string, status: number, data?: unknown, requestId?: string) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
     this.data = data;
+    this.requestId = requestId;
   }
+}
+
+function generateRequestId(): string {
+  const rand = Math.random().toString(36).substring(2, 10);
+  return `req_fe_${Date.now().toString(36)}_${rand}`;
 }
 
 class ApiClient {
@@ -46,10 +53,25 @@ class ApiClient {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-    const defaultHeaders: HeadersInit = {
-      'Content-Type': 'application/json',
+    const requestId = generateRequestId();
+    const isFormData = customConfig.body instanceof FormData;
+    const defaultHeaders: Record<string, string> = {
       Accept: 'application/json',
+      'X-Request-ID': requestId,
     };
+    if (!isFormData) {
+      defaultHeaders['Content-Type'] = 'application/json';
+    }
+
+    // Attach Bearer token if available
+    try {
+      const token = typeof localStorage !== 'undefined' ? localStorage.getItem('packcheck_token') || localStorage.getItem('token') : null;
+      if (token) {
+        defaultHeaders['Authorization'] = `Bearer ${token}`;
+      }
+    } catch {
+      // Ignore localStorage access restrictions
+    }
 
     const config: RequestInit = {
       ...customConfig,
@@ -64,18 +86,23 @@ class ApiClient {
       const response = await fetch(url, config);
       clearTimeout(timeoutId);
 
+      const respRequestId = response.headers.get('X-Request-ID') || requestId;
+
       if (!response.ok) {
         let errorData: unknown;
+        let errorMessage = `Request failed with status ${response.status}`;
+
         try {
           errorData = await response.json();
+          if (errorData && typeof errorData === 'object') {
+            const errObj = errorData as { error?: { message?: string }; message?: string };
+            errorMessage = errObj.error?.message || errObj.message || errorMessage;
+          }
         } catch {
           errorData = await response.text();
         }
-        throw new ApiError(
-          `Request failed with status ${response.status}`,
-          response.status,
-          errorData
-        );
+
+        throw new ApiError(errorMessage, response.status, errorData, respRequestId);
       }
 
       // If no content, return undefined

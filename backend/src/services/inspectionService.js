@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import InspectionRepository from "../models/Inspection.js";
 import { inspectImagesViaAI, AIServiceError } from "./aiClient.js";
+import { AuditService } from "./auditService.js";
 
 /**
  * Maps raw AI unified facts and OCR data into canonical inspection fields.
@@ -157,17 +158,43 @@ export class InspectionService {
       imageMetadata: { viewsAnalyzed: files.length, inspectedViews: [], coverageStatus: "UNKNOWN" },
     });
 
+    await AuditService.recordEvent({
+      requestId: correlationId,
+      inspectionId,
+      actorId: user?.id || "system",
+      actorRole: user?.role || "OFFICER",
+      action: "INSPECTION_CREATED",
+      details: { imageCount: files.length },
+    });
+
     try {
       // Execute AI computer vision pipeline
       const aiResult = await inspectImagesViaAI(files, correlationId, inspectionId);
 
       // Extract canonical structures
       const fields = buildCanonicalFields(aiResult);
-      const rawStatus = aiResult.overall_status || aiResult.status || "REVIEW_REQUIRED";
+      const rawStatus = (aiResult.overall_status || aiResult.status || "REVIEW_REQUIRED").toString().toUpperCase();
+
+      const rawFieldResults =
+        aiResult.compliance_result?.field_results ||
+        aiResult.compliance_result?.rule_evaluations ||
+        [];
+      const rawViolations = aiResult.compliance_result?.violations || [];
+
+      // Check if any fields failed or violations were detected
+      const hasFailedFields = rawFieldResults.some(
+        (r) => (r.status || "").toUpperCase() !== "PASS" && (r.status || "").toUpperCase() !== "COMPLIANT"
+      );
+      const hasViolations = rawViolations.length > 0;
+
       let finalStatus = "REVIEW_REQUIRED";
-      if (rawStatus === "COMPLIANT" || rawStatus === "PASS") finalStatus = "COMPLIANT";
-      else if (rawStatus === "NON_COMPLIANT" || rawStatus === "FAIL") finalStatus = "NON_COMPLIANT";
-      else if (rawStatus === "INSUFFICIENT_EVIDENCE") finalStatus = "REVIEW_REQUIRED";
+      if (hasFailedFields || hasViolations || rawStatus === "NON_COMPLIANT" || rawStatus === "FAIL") {
+        finalStatus = "NON_COMPLIANT";
+      } else if (rawStatus === "COMPLIANT" || rawStatus === "PASS") {
+        finalStatus = "COMPLIANT";
+      } else if (rawStatus === "INSUFFICIENT_EVIDENCE") {
+        finalStatus = "REVIEW_REQUIRED";
+      }
 
       // Update image records with classified view and quality
       if (Array.isArray(aiResult.coverage?.inspected_views)) {
@@ -178,6 +205,39 @@ export class InspectionService {
 
       // Compute provenance hash
       const hash = crypto.createHash("sha256").update(JSON.stringify(aiResult)).digest("hex");
+
+      const ruleEvaluations = rawFieldResults.map((r) => {
+        const isPassed = (r.status || "").toUpperCase() === "PASS" || (r.status || "").toUpperCase() === "COMPLIANT";
+        return {
+          rule_id: r.rule_id || r.ruleId,
+          rule_name: r.field_name
+            ? `Mandatory Declaration: ${r.field_name.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}`
+            : (r.rule_name || "Compliance Check"),
+          field_name: r.field_name,
+          passed: isPassed,
+          severity: r.severity || "HIGH",
+          message: r.explanation || r.message || (isPassed ? "Declaration compliant" : "Declaration missing or non-compliant"),
+          legal_reference: r.legal_reference || "Legal Metrology (Packaged Commodities) Rules, 2011",
+        };
+      });
+
+      const violations = rawViolations.map((v) => ({
+        rule_id: v.rule_id,
+        rule_name: v.field_name
+          ? `Mandatory Declaration: ${v.field_name.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}`
+          : (v.rule_name || "Violation"),
+        field_name: v.field_name,
+        severity: v.severity || "HIGH",
+        message: v.message || "Mandatory statutory declaration non-compliant",
+        reason_code: v.reason_code,
+      }));
+
+      // Calculate score accurately
+      const totalRules = ruleEvaluations.length;
+      const passedCount = ruleEvaluations.filter((r) => r.passed).length;
+      const score = totalRules > 0
+        ? Math.max(0, Math.round((passedCount / totalRules) * 100))
+        : (finalStatus === "COMPLIANT" ? 100 : 0);
 
       const updatePayload = {
         status: finalStatus,
@@ -195,9 +255,10 @@ export class InspectionService {
         regulatoryDeclarations: aiResult.unified_facts || {},
         compliance: {
           overallStatus: finalStatus,
-          ruleEvaluations: aiResult.compliance_result?.rule_evaluations || [],
-          violations: aiResult.compliance_result?.violations || [],
-          warnings: aiResult.compliance_result?.warnings || [],
+          ruleEvaluations,
+          violations,
+          warnings: aiResult.compliance_result?.review_items || aiResult.compliance_result?.warnings || [],
+          score,
         },
         contradictions: aiResult.contradictions || [],
         aiResult,
@@ -219,6 +280,16 @@ export class InspectionService {
         updatePayload,
         { new: true }
       );
+
+      await AuditService.recordEvent({
+        requestId: correlationId,
+        inspectionId,
+        actorId: "ai_service",
+        actorRole: "AI_MODEL",
+        action: "AI_EVALUATION_COMPLETED",
+        details: { status: finalStatus, sha256: hash },
+        newState: { status: finalStatus },
+      });
 
       return formatInspectionForFrontend(updated);
     } catch (err) {

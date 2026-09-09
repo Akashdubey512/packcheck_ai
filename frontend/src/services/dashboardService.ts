@@ -64,7 +64,33 @@ export const DashboardService = {
     }
 
     try {
-      return await apiClient.get<DashboardMetrics>(API_ENDPOINTS.DASHBOARD.METRICS);
+      const res = await apiClient.get<any>(API_ENDPOINTS.DASHBOARD.METRICS);
+      const data = res.data || res;
+      
+      const recentActivity = Array.isArray(data.recentActivity)
+        ? data.recentActivity
+        : Array.isArray(data.recentScans)
+        ? data.recentScans.map((s: any) => ({
+            id: s.id || s.inspectionId,
+            type: 'scan',
+            title: `Inspection: ${s.product?.name || s.fileName || 'Package'}`,
+            timestamp: s.uploadedAt ? new Date(s.uploadedAt).toLocaleString() : 'Recently',
+            status: s.complianceVerdict || (s.status === 'COMPLIANT' ? 'compliant' : 'review'),
+            actor: 'System / Automated Pipeline',
+          }))
+        : DEMO_DASHBOARD_METRICS.recentActivity;
+
+      return {
+        ...DEMO_DASHBOARD_METRICS,
+        totalScans: data.totalScans ?? data.total ?? DEMO_DASHBOARD_METRICS.totalScans,
+        compliantCount: data.compliantCount ?? DEMO_DASHBOARD_METRICS.compliantCount,
+        nonCompliantCount: data.violationCount ?? data.nonCompliantCount ?? DEMO_DASHBOARD_METRICS.nonCompliantCount,
+        reviewRequiredCount: data.reviewCount ?? data.reviewRequiredCount ?? DEMO_DASHBOARD_METRICS.reviewRequiredCount,
+        complianceRate: data.passRate ?? DEMO_DASHBOARD_METRICS.complianceRate,
+        scansByCategory: Array.isArray(data.scansByCategory) ? data.scansByCategory : DEMO_DASHBOARD_METRICS.scansByCategory,
+        scansTimeline: Array.isArray(data.scansTimeline) ? data.scansTimeline : DEMO_DASHBOARD_METRICS.scansTimeline,
+        recentActivity,
+      };
     } catch (err) {
       console.warn('Backend metrics service unavailable. Using cached compliance metrics telemetry.', err);
       return DEMO_DASHBOARD_METRICS;

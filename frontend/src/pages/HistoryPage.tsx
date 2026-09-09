@@ -39,11 +39,13 @@ export const HistoryPage: React.FC = () => {
       sortOrder,
     })
       .then((data) => {
-        setItems(data.items);
-        setTotal(data.total);
-        setTotalPages(data.totalPages);
+        const safeItems = Array.isArray(data?.items) ? data.items : [];
+        setItems(safeItems);
+        setTotal(data?.total ?? safeItems.length);
+        setTotalPages(data?.totalPages ?? 1);
       })
       .catch(() => {
+        setItems([]);
         setError('Unable to load inspection history from compliance service. Please retry.');
       })
       .finally(() => setLoading(false));
@@ -55,7 +57,7 @@ export const HistoryPage: React.FC = () => {
 
   const handleExportCSV = () => {
     const csvHeader = 'Inspection ID,Product Name,GTIN,Status,Score,Auditor,Timestamp,Category,Batch Number\n';
-    const csvRows = items
+    const csvRows = (items || [])
       .map(
         (i) =>
           `"${i.scanId}","${i.productName.replace(/"/g, '""')}","${i.gtin}","${i.status}",${i.complianceScore},"${i.scannedBy}","${i.timestamp}","${i.category}","${i.batchNumber || 'N/A'}"`
@@ -86,7 +88,7 @@ export const HistoryPage: React.FC = () => {
           <Button size="sm" variant="outline" onClick={fetchHistory} disabled={loading} aria-label="Refresh inspection history">
             <RefreshCw size={13} className={`mr-1.5 ${loading ? 'animate-spin' : ''}`} /> Refresh
           </Button>
-          <Button size="sm" variant="primary" onClick={handleExportCSV} disabled={items.length === 0} aria-label="Export history to CSV">
+          <Button size="sm" variant="primary" onClick={handleExportCSV} disabled={(items || []).length === 0} aria-label="Export history to CSV">
             <Download size={13} className="mr-1.5" /> Export CSV
           </Button>
         </div>

@@ -1,0 +1,111 @@
+name: PackCheck AI CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  backend-matrix:
+    name: Backend Gateway Verification Suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'backend/package-lock.json'
+
+      - name: Install System Dependencies (Chromium for Puppeteer)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chromium-browser
+
+      - name: Install Backend Dependencies
+        run: |
+          cd backend
+          npm ci
+
+      - name: Execute Backend Tests (Unit, Security, Reliability & E2E)
+        env:
+          NODE_ENV: test
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium-browser
+        run: |
+          cd backend
+          npm test
+
+  ai-service-matrix:
+    name: AI Microservice Verification Suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: 'ai-service/requirements.txt'
+
+      - name: Install OCR System Packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr libgl1-mesa-glx poppler-utils
+
+      - name: Install Python Dependencies
+        run: |
+          cd ai-service
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Execute AI Microservice Tests
+        run: |
+          cd ai-service
+          python -m unittest discover -s tests
+
+  frontend-matrix:
+    name: Frontend React UI Verification Suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      - name: Install Frontend Dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: TypeScript Typecheck
+        run: |
+          cd frontend
+          npm run typecheck
+
+      - name: Execute Frontend Tests (Vitest)
+        run: |
+          cd frontend
+          npm test -- --run
+
+  docker-build-verification:
+    name: Container Build & Orchestration Verification
+    needs: [backend-matrix, ai-service-matrix, frontend-matrix]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Docker Compose Configuration
+        run: |
+          docker compose config
+
+      - name: Build Production Containers
+        run: |
+          docker compose build

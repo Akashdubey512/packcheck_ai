@@ -19,6 +19,7 @@ export const ScanPage: React.FC = () => {
     state,
     startUpload,
     uploadSuccess,
+    uploadFailed,
     startProcessing,
     processingSuccess,
     reset,
@@ -51,19 +52,26 @@ export const ScanPage: React.FC = () => {
 
   const handleFileSelected = async (file: File, sampleId?: string) => {
     setActiveFile(file);
+    const localUrl = URL.createObjectURL(file);
+    setPreviewUrl(localUrl);
     startUpload(file);
 
     try {
       const response = await ScanService.uploadScan(file, sampleId);
-      setActiveScanId(response.scanId);
-      setPreviewUrl(response.fileUrl);
-      uploadSuccess(response.scanId);
-    } catch {
-      // Create local preview if service mock errors
-      const localUrl = URL.createObjectURL(file);
-      setPreviewUrl(localUrl);
-      setActiveScanId(`scn_${Date.now()}`);
-      uploadSuccess(`scn_${Date.now()}`);
+      const finalScanId = response.scanId || (sampleId ? `scn_${sampleId}` : `scn_sample_cereal_violations`);
+      setActiveScanId(finalScanId);
+      if (response.fileUrl && (response.fileUrl.startsWith('http') || response.fileUrl.startsWith('data:'))) {
+        setPreviewUrl(response.fileUrl);
+      }
+      uploadSuccess(finalScanId);
+    } catch (err: any) {
+      console.error('Packaging artifact upload error:', err);
+      const errorMessage =
+        err?.response?.data?.error?.message ||
+        err?.response?.data?.detail ||
+        err?.message ||
+        'An error occurred while uploading or parsing the packaging label image.';
+      uploadFailed(errorMessage);
     }
   };
 

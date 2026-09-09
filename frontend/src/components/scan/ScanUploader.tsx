@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Upload, FileImage, Camera, Layers, AlertCircle } from 'lucide-react';
+import { Upload, FileImage, Camera, Layers, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { PRESET_LABEL_SAMPLES, PresetLabelSample } from '@/utils/sampleLabels';
@@ -12,7 +12,16 @@ interface ScanUploaderProps {
   isUploading?: boolean;
 }
 
-const ACCEPTED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const ACCEPTED_TYPES = [
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp',
+  'image/svg+xml',
+  'image/svg',
+  'image/gif',
+  'image/bmp',
+];
 
 export const ScanUploader: React.FC<ScanUploaderProps> = ({ onFileSelected, isUploading = false }) => {
   const [isDragOver, setIsDragOver] = useState(false);
@@ -24,9 +33,9 @@ export const ScanUploader: React.FC<ScanUploaderProps> = ({ onFileSelected, isUp
     setErrorMessage(null);
 
     // Accept specified image formats
-    const isAccepted = ACCEPTED_TYPES.includes(file.type) || /\.(jpe?g|png|webp)$/i.test(file.name);
+    const isAccepted = ACCEPTED_TYPES.includes(file.type) || /\.(jpe?g|png|webp|svg|gif|bmp)$/i.test(file.name);
     if (!isAccepted && !sampleId) {
-      setErrorMessage('Unsupported file format. Please upload JPG, PNG, or WEBP packaging label images.');
+      setErrorMessage('Unsupported file format. Please upload JPG, PNG, WEBP, SVG, GIF, or BMP packaging label images.');
       return;
     }
 
@@ -83,7 +92,7 @@ export const ScanUploader: React.FC<ScanUploaderProps> = ({ onFileSelected, isUp
         <input
           ref={fileInputRef}
           type="file"
-          accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+          accept=".jpg,.jpeg,.png,.webp,.svg,.bmp,.gif,image/*"
           className="hidden"
           onChange={(e) => {
             if (e.target.files && e.target.files[0]) {
@@ -104,45 +113,66 @@ export const ScanUploader: React.FC<ScanUploaderProps> = ({ onFileSelected, isUp
           }}
         />
 
-        <div className="flex flex-col items-center justify-center space-y-4 max-w-md mx-auto">
-          <div className="w-14 h-14 rounded-full bg-surface-muted border border-border flex items-center justify-center text-primary shadow-subtle">
-            <Upload size={24} strokeWidth={2} />
-          </div>
+        {isUploading ? (
+          <div className="flex flex-col items-center justify-center space-y-4 max-w-md mx-auto py-2">
+            <div className="w-14 h-14 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center text-primary shadow-subtle">
+              <Loader2 size={26} className="animate-spin text-primary" />
+            </div>
 
-          <div className="space-y-1">
-            <h3 className="text-base font-semibold text-foreground">
-              Upload Packaging Label Artifact
-            </h3>
-            <p className="text-xs text-slate-500 leading-relaxed">
-              Drag and drop product front or back panel image, or browse local inspection files.
-            </p>
-          </div>
+            <div className="space-y-1 text-center">
+              <h3 className="text-base font-semibold text-foreground">
+                Uploading & Analyzing Packaging Artifact...
+              </h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Running optical character recognition & Legal Metrology statutory compliance evaluation.
+              </p>
+            </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
-            <Button
-              type="button"
-              variant="primary"
-              size="sm"
-              disabled={isUploading}
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <FileImage size={14} className="mr-1.5" /> Select Image File
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={isUploading}
-              onClick={() => cameraInputRef.current?.click()}
-            >
-              <Camera size={14} className="mr-1.5" /> Capture with Camera
-            </Button>
+            <div className="flex items-center gap-2 text-2xs font-mono text-primary font-semibold animate-pulse pt-1">
+              <span>Stage 1 AI Pipeline Active...</span>
+            </div>
           </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center space-y-4 max-w-md mx-auto">
+            <div className="w-14 h-14 rounded-full bg-surface-muted border border-border flex items-center justify-center text-primary shadow-subtle">
+              <Upload size={24} strokeWidth={2} />
+            </div>
 
-          <div className="text-2xs text-slate-400 font-mono pt-1">
-            Supported Formats: JPG, JPEG, PNG, WEBP
+            <div className="space-y-1">
+              <h3 className="text-base font-semibold text-foreground">
+                Upload Packaging Label Artifact
+              </h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Drag and drop product front or back panel image, or browse local inspection files.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                disabled={isUploading}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <FileImage size={14} className="mr-1.5" /> Select Image File
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={isUploading}
+                onClick={() => cameraInputRef.current?.click()}
+              >
+                <Camera size={14} className="mr-1.5" /> Capture with Camera
+              </Button>
+            </div>
+
+            <div className="text-2xs text-slate-400 font-mono pt-1">
+              Supported Formats: JPG, JPEG, PNG, WEBP, SVG, GIF, BMP
+            </div>
           </div>
-        </div>
+        )}
 
         {errorMessage && (
           <div className="mt-4 p-3 rounded bg-violation-surface border border-violation-border text-violation-foreground text-xs flex items-center justify-center gap-2">

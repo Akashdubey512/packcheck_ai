@@ -13,7 +13,7 @@ interface RecentInspectionsProps {
   recentActivity: DashboardMetrics['recentActivity'];
 }
 
-export const RecentInspections: React.FC<RecentInspectionsProps> = ({ recentActivity }) => {
+export const RecentInspections: React.FC<RecentInspectionsProps> = ({ recentActivity = [] }) => {
   const navigate = useNavigate();
 
   return (

@@ -1,6 +1,7 @@
 import InspectionRepository from "../models/Inspection.js";
 import { submitHumanReviewViaAI } from "./aiClient.js";
 import { formatInspectionForFrontend } from "./inspectionService.js";
+import { AuditService } from "./auditService.js";
 
 export class ReviewService {
   /**
@@ -108,6 +109,18 @@ export class ReviewService {
       updatePayload,
       { new: true }
     );
+
+    // Record immutable audit trail event
+    await AuditService.recordEvent({
+      requestId,
+      inspectionId: canonicalId,
+      actorId: reviewEvent.reviewerId,
+      actorRole: reviewEvent.reviewerRole,
+      action: "REVIEW_OVERRIDE_APPLIED",
+      details: { fieldName, newValue, reason },
+      previousState: { value: oldValue, status: doc.status },
+      newState: { value: newValue, status: newStatus },
+    });
 
     return {
       event: reviewEvent,

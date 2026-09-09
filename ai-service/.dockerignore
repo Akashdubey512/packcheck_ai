@@ -1,0 +1,20 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.venv
+venv
+env
+sih
+.git
+.gitignore
+tests
+test
+archive (1)
+Indian-Scene-Text-Dataset-master
+Label-extraction-using-ocr-and-vit-main
+processed_data/sessions/*
+!processed_data/sessions/.gitkeep
+reports/pdf_exports/*
+!reports/pdf_exports/.gitkeep

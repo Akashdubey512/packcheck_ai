@@ -190,8 +190,35 @@ export const HistoryService = {
       };
     }
 
-    return apiClient.get<HistoryResponse>(API_ENDPOINTS.HISTORY.LIST, {
+    const res = await apiClient.get<any>(API_ENDPOINTS.HISTORY.LIST, {
       params: params as Record<string, string | number | boolean | undefined>,
     });
+    const data = res.data || res;
+    const rawItems = Array.isArray(data.items) ? data.items : Array.isArray(data.inspections) ? data.inspections : Array.isArray(data.scans) ? data.scans : [];
+    const itemsList: HistoryItem[] = rawItems.map((doc: any) => ({
+      id: doc.id || doc.inspectionId || `hist_${Math.random().toString(36).slice(2)}`,
+      scanId: doc.scanId || doc.inspectionId || doc.id || 'N/A',
+      productName: doc.productName || doc.product?.name || doc.fileName || 'Packaged Commodity',
+      gtin: doc.gtin || doc.product?.gtin || 'N/A',
+      status: doc.status === 'COMPLIANT' || doc.complianceVerdict === 'compliant' ? 'compliant' : doc.status === 'NON_COMPLIANT' || doc.complianceVerdict === 'violation' ? 'violation' : 'review',
+      timestamp: doc.timestamp || doc.uploadedAt || doc.createdAt || new Date().toISOString(),
+      violationCount: doc.violationCount ?? (doc.violations?.length || 0),
+      complianceScore: doc.complianceScore ?? (doc.overallScore || 0),
+      scannedBy: doc.scannedBy || doc.uploadedBy || 'Statutory Inspector',
+      category: doc.category || doc.product?.category || 'General Commodity',
+      batchNumber: doc.batchNumber || doc.product?.batchNumber || 'N/A',
+    }));
+
+    const totalCount = Number(data.total ?? itemsList.length);
+    const limitNum = Number(data.limit || params.limit || 10);
+    const totalPg = Math.max(1, Math.ceil(totalCount / limitNum));
+
+    return {
+      items: itemsList,
+      total: totalCount,
+      page: Number(data.page || params.page || 1),
+      limit: limitNum,
+      totalPages: totalPg,
+    };
   },
 };

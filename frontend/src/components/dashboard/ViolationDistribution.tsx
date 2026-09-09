@@ -9,7 +9,7 @@ interface ViolationDistributionProps {
   categories: CategoryMetric[];
 }
 
-export const ViolationDistribution: React.FC<ViolationDistributionProps> = ({ categories }) => {
+export const ViolationDistribution: React.FC<ViolationDistributionProps> = ({ categories = [] }) => {
   return (
     <Card className="border border-border shadow-card">
       <CardHeader className="pb-3 border-b border-border">

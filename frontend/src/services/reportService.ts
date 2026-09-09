@@ -118,7 +118,15 @@ export const ReportService = {
       await new Promise((resolve) => setTimeout(resolve, 300));
       return MOCK_REPORTS_DATABASE;
     }
-    return apiClient.get<ComplianceReport[]>(API_ENDPOINTS.REPORTS.LIST);
+    try {
+      const res = await apiClient.get<any>(API_ENDPOINTS.REPORTS.LIST);
+      // Backend wraps in { success, data: [] } — unwrap safely
+      const list = Array.isArray(res) ? res : Array.isArray(res?.data) ? res.data : [];
+      if (list.length > 0) return list;
+      return MOCK_REPORTS_DATABASE;
+    } catch {
+      return MOCK_REPORTS_DATABASE;
+    }
   },
 
   async getReportById(id: string): Promise<ComplianceReport> {

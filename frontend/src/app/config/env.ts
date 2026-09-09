@@ -9,7 +9,7 @@ const envSchema = z.object({
   VITE_APP_ENV: z.enum(['development', 'staging', 'production']).default('development'),
   VITE_API_TIMEOUT_MS: z
     .string()
-    .default('15000')
+    .default('60000')
     .transform((val) => parseInt(val, 10))
     .pipe(z.number().positive()),
 });
@@ -34,7 +34,7 @@ export const env = parsed.success
       VITE_DEMO_MODE: true,
       VITE_API_BASE_URL: 'http://localhost:8000/api/v1',
       VITE_APP_ENV: 'development' as const,
-      VITE_API_TIMEOUT_MS: 15000,
+      VITE_API_TIMEOUT_MS: 60000,
     };
 
 export const isDemoMode = (): boolean => env.VITE_DEMO_MODE;

@@ -9,9 +9,9 @@ interface ComplianceTrendProps {
   timeline: TimelineMetric[];
 }
 
-export const ComplianceTrend: React.FC<ComplianceTrendProps> = ({ timeline }) => {
+export const ComplianceTrend: React.FC<ComplianceTrendProps> = ({ timeline = [] }) => {
   const [hoveredDay, setHoveredDay] = useState<TimelineMetric | null>(null);
-  const maxDaily = Math.max(...timeline.map((d) => d.total), 300);
+  const maxDaily = Math.max(...(timeline || []).map((d) => d.total), 300);
 
   return (
     <Card className="border border-border shadow-card relative overflow-hidden">

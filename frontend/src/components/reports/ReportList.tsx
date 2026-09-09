@@ -20,12 +20,18 @@ export const ReportList: React.FC<ReportListProps> = ({ reports, onSelectReport,
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
-  const filtered = reports.filter((r) => {
+  const safeReports = Array.isArray(reports) ? reports : [];
+
+  const filtered = safeReports.filter((r) => {
+    if (!r) return false;
+    const name = r.productInfo?.name || '';
+    const mfg = r.productInfo?.manufacturer || '';
+    const idStr = r.id || '';
     const matchesSearch =
       !search.trim() ||
-      r.id.toLowerCase().includes(search.toLowerCase()) ||
-      r.productInfo.name.toLowerCase().includes(search.toLowerCase()) ||
-      r.productInfo.manufacturer.toLowerCase().includes(search.toLowerCase());
+      idStr.toLowerCase().includes(search.toLowerCase()) ||
+      name.toLowerCase().includes(search.toLowerCase()) ||
+      mfg.toLowerCase().includes(search.toLowerCase());
     const matchesStatus = !statusFilter || r.overallStatus === statusFilter;
     return matchesSearch && matchesStatus;
   });
