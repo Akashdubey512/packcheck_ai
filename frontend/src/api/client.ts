@@ -39,7 +39,7 @@ class ApiClient {
     } else if (typeof window !== 'undefined' && window.location?.origin) {
       url = new URL(`${this.baseUrl}${cleanEndpoint}`, window.location.origin);
     } else {
-      url = new URL(`${this.baseUrl}${cleanEndpoint}`, 'http://localhost:5000');
+      url = new URL(`${this.baseUrl}${cleanEndpoint}`, 'https://packcheck-backend-5ftw.onrender.com');
     }
 
     if (params) {

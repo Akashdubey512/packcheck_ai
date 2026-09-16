@@ -16,6 +16,7 @@ import { ROUTES } from '@/constants/routes';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, FileText, Target, ShieldCheck, GitCommit, CheckCircle, ExternalLink, Lock, Layers } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { env } from '@/app/config/env';
 import { butterSpring, pageFadeSlide, gpuAcceleratedStyle } from '@/animations/motion';
 
 export const ScanDetailPage: React.FC = () => {
@@ -324,7 +325,7 @@ export const ScanDetailPage: React.FC = () => {
     setIsExporting(true);
     try {
       const token = localStorage.getItem('token') || '';
-      const response = await fetch(`http://localhost:5000/api/v1/inspections/${id}/report`, {
+      const response = await fetch(`${env.VITE_API_BASE_URL}/inspections/${id}/report`, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
       if (response.ok) {

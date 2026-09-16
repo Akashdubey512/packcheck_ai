@@ -1,6 +1,6 @@
 import { apiClient } from '@/api/client';
 import { API_ENDPOINTS } from '@/api/endpoints';
-import { isDemoMode } from '@/app/config/env';
+import { isDemoMode, env } from '@/app/config/env';
 import { ComplianceCheck, Violation } from '@/types/compliance';
 import { DecisionTrace } from '@/types/evidence';
 
@@ -448,7 +448,7 @@ export const ComplianceService = {
 
   async certifyInspection(scanId: string, role?: string, userId?: string): Promise<any> {
     const token = localStorage.getItem('token') || '';
-    const res = await fetch(`http://localhost:5000/api/v1/inspections/${scanId}/certify`, {
+    const res = await fetch(`${env.VITE_API_BASE_URL}/inspections/${scanId}/certify`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
