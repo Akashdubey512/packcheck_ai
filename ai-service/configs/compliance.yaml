@@ -3,7 +3,7 @@
 pipeline:
   version: "1.0.0"
   rule_registry_version: "2022.1"
-  rule_source_file: "raw_data/legal_metrology/legal_metrology_rules.json"
+  rule_source_file: "configs/legal_metrology_rules.json"
 
 decision_rules:
   unambiguous_fail_action: "NON_COMPLIANT"

@@ -36,6 +36,7 @@ COPY --chown=appuser:appuser ml ./ml
 COPY --chown=appuser:appuser reporting ./reporting
 COPY --chown=appuser:appuser configs ./configs
 COPY --chown=appuser:appuser scripts ./scripts
+COPY --chown=appuser:appuser raw_data/legal_metrology ./raw_data/legal_metrology
 
 # Switch to unprivileged user
 USER appuser

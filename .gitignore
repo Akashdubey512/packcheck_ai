@@ -51,6 +51,8 @@ ai-service/archive*/
 ai-service/Indian-Scene-Text-Dataset-master/
 ai-service/Label-extraction-using-ocr-and-vit-main/
 ai-service/raw_data/
+!ai-service/raw_data/legal_metrology/
+!ai-service/raw_data/legal_metrology/**
 ai-service/processed_data/
 ai-service/test/
 ai-service/train/
@@ -58,6 +60,7 @@ ai-service/scratch/
 
 # General dataset patterns
 **/raw_data/
+!**/legal_metrology/**
 **/processed_data/
 **/datasets/
 **/dataset/

@@ -1,0 +1,63 @@
+{
+  "title": "The Legal Metrology (Packaged Commodities) Rules, 2011",
+  "authority": "Department of Consumer Affairs, Ministry of Consumer Affairs, Food and Public Distribution, Government of India",
+  "enactment_year": 2011,
+  "key_amendments": [
+    2017,
+    2021,
+    2022
+  ],
+  "mandatory_declarations": {
+    "rule_6_1_a": {
+      "field_name": "manufacturer_name_and_address",
+      "description": "Name and address of the manufacturer, or packer, or importer",
+      "required": true
+    },
+    "rule_6_1_b": {
+      "field_name": "country_of_origin",
+      "description": "Country of origin for imported products",
+      "required": true
+    },
+    "rule_6_1_c": {
+      "field_name": "common_generic_name",
+      "description": "Common or generic name of the commodity contained in the package",
+      "required": true
+    },
+    "rule_6_1_d": {
+      "field_name": "net_quantity",
+      "description": "Net quantity in terms of standard unit of weight, measure or number",
+      "required": true
+    },
+    "rule_6_1_e": {
+      "field_name": "manufacturing_packing_date",
+      "description": "Month and year in which the commodity is manufactured or packed or imported",
+      "required": true
+    },
+    "rule_6_1_f": {
+      "field_name": "best_before_expiry",
+      "description": "Best before or use by date, month and year for perishable items",
+      "required": true
+    },
+    "rule_6_1_g": {
+      "field_name": "mrp",
+      "description": "Maximum Retail Price (MRP) inclusive of all taxes, formatted as MRP Rs. xx.xx or Maximum Retail Price Rs. xx.xx incl. of all taxes",
+      "required": true
+    },
+    "rule_6_1_h": {
+      "field_name": "consumer_care_details",
+      "description": "Name, address, telephone number, email address of the person/office to contact in case of consumer complaints",
+      "required": true
+    },
+    "rule_6_11": {
+      "field_name": "unit_sale_price",
+      "description": "Unit sale price rounded off to the nearest rupee or paise (mandatory w.e.f. 2022 amendment)",
+      "required": true
+    }
+  },
+  "font_size_and_declaration_rules": {
+    "area_less_than_100_sq_cm": "Minimum height of numeral: 1.5mm",
+    "area_100_to_500_sq_cm": "Minimum height of numeral: 2.5mm",
+    "area_500_to_2500_sq_cm": "Minimum height of numeral: 4.0mm",
+    "area_above_2500_sq_cm": "Minimum height of numeral: 6.0mm"
+  }
+}
