@@ -28,7 +28,7 @@ def load_ocr_config(config_path: Path = CONFIG_PATH) -> Dict[str, Any]:
         except Exception:
             pass
     return {
-        "ocr": {"default_backend": "rapidocr", "fallback_backends": ["easyocr", "pytesseract"], "languages": ["en", "hi"]},
+        "ocr": {"default_backend": "rapidocr", "fallback_backends": ["pytesseract"], "languages": ["en", "hi"]},
         "merging": {"enable_region_merging": True, "horizontal_max_gap_px": 20, "vertical_overlap_ratio": 0.5}
     }
 
@@ -41,7 +41,7 @@ class FullOCRPipeline:
         
         target_backend = backend_name or ocr_cfg.get("default_backend", "rapidocr")
         languages = ocr_cfg.get("languages", ["en", "hi"])
-        fallbacks = ocr_cfg.get("fallback_backends", ["easyocr", "pytesseract"])
+        fallbacks = ocr_cfg.get("fallback_backends", ["pytesseract"])
         
         # Initialize Phase 2 Preprocessing Pipeline
         self.prep_pipeline = PreprocessingPipeline()

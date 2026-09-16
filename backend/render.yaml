@@ -30,7 +30,7 @@ services:
     rootDir: ai-service
     dockerfilePath: Dockerfile
     plan: free
-    healthCheckPath: /ready
+    healthCheckPath: /health
     envVars:
       - key: PORT
         value: 8000

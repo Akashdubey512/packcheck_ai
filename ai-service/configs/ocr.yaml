@@ -2,8 +2,8 @@
 # Project: Legal Metrology (Packaged Commodities) Compliance Auditor - SIH 2026
 
 ocr:
-  default_backend: "rapidocr"          # Options: "rapidocr", "easyocr", "pytesseract"
-  fallback_backends: ["easyocr", "pytesseract"]
+  default_backend: "rapidocr"          # Options: "rapidocr", "pytesseract"
+  fallback_backends: ["pytesseract"]
   languages: ["en", "hi"]              # Target languages: English, Hindi / Devanagari
 
 detection:
