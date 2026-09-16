@@ -78,6 +78,24 @@ app.use("/api/scans", inspectionRoutes); // Map /api/scans to canonical router
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/scan", inspectionRoutes); // Handle frontend direct /scan paths
 
+// Root landing route
+app.get("/", (req, res) => {
+  res.json({
+    status: "ok",
+    service: "PackCheck AI - Statutory Regulatory Compliance Backend Gateway",
+    version: "2.2.0",
+    environment: process.env.NODE_ENV || "development",
+    endpoints: {
+      health: "/health",
+      ready: "/ready",
+      apiV1: "/api/v1",
+      inspections: "/api/v1/inspections",
+      inspect: "/api/v1/inspect (POST)",
+    },
+    message: "Backend API is live and operational. For user interface, access the frontend application.",
+  });
+});
+
 // Liveness probe
 app.get("/health", (req, res) =>
   res.json({
